@@ -1,0 +1,164 @@
+body {
+    font-family: "Montserrat Alternate", sans-serif;
+    background-color: #d9fbff;
+    color: #333;
+
+    padding: 0;
+}
+
+.welcome-container {
+
+    width: 100%;
+    height: 20vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: 200px;
+    padding-left: 200px;
+    box-sizing: border-box;
+}
+
+h1 {
+    font-family: "Montserrat Alternates", sans-serif;
+    font-weight: 500;
+    margin:0;
+    font-size: 70px;
+    color: #000;
+}
+
+.welcome-parrot {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 20%;
+    height:auto;
+}
+
+p {
+    font-family: "Montserrat Alternates", sans-serif;
+    font-size: 30px;
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 5rem;
+    
+}
+
+.buttons {
+
+    display: flex;
+    gap: 100px;
+}
+
+button {
+    background-color: #9ce4ec;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 30px;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #96d9e4;
+}
+
+a {
+    text-decoration: none;
+}
+
+.navbar {
+    background-color: #67b7bf;
+    list-style: none;
+    display: flex;
+    gap: 60px;
+    font-size: 30px;
+    padding: 20px;
+    margin-top: 0;
+}
+
+.navbar li a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.navbar li a:hover {
+    color: #000;
+    text-decoration: underline;
+}
+
+.register-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 100px;
+}
+
+.register-container>h1 {
+    border-bottom: 1px solid #aeaeae;
+}
+
+.register-container input {
+    border: 1px solid #aeaeae;
+    border-radius: 10px;
+    margin-top: 30px;
+    display: block;
+    width: 100%;
+    height: 40px;
+}
+
+.register-container button {
+    margin-top: 40px;
+}
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 200px;
+}
+
+.login-container>h1 {
+    border-bottom: 1px solid #aeaeae;
+}
+
+.login-container input {
+    margin-left: -60px;
+    border: 1px solid #aeaeae;
+    border-radius: 10px;
+    margin-top: 30px;
+    display: block;
+    width: 200%;
+    height: 50px;
+}
+
+.login-container button {
+    margin-top: 40px;
+}
+
+.dashboard-buttons>h1 {
+    font-family: "Montserrat Alternates", sans-serif;
+    border-bottom: 1px solid #aeaeae;
+}
+
+.dashboard-buttons {
+    display: flex;
+    flex-direction: column;
+    padding-top: 100px;
+    padding-left: 50px;
+}
+
+.dashboard-buttons > form > button {
+    margin-left: 50px;
+    margin-top: 30px;
+}
+
+.delete-user-btn {
+    margin-top: 60px;
+    background-color: #EEA1A1;
+}
+
+.delete-user-btn:hover {
+    background-color: #e48484;
+}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+
+
+<div class="dashboard-buttons">
+    <h1>Личный кабинет</h1>
+    <p>Приветствуем, {{ user_name }}!</p>
+    <form action="/create-task" method="get">
+        <button type="submit">Создать задачу</button>
+    </form>
+    
+    <form action="/tasks" method="get">
+        <button type="submit">Просмотр задач</button>
+    </form>
+    {% if is_admin %}
+    <form action="/edit-categories" method="get">
+        <button type="submit">Редактировать категории</button>
+    </form>
+    {% endif %}
+    <form action="/delete-account" method="post" onsubmit="return confirm('Точно удалить аккаунт?');">
+
+        <button class="delete-user-btn" type="submit">Удалить аккаунт</button>
+    </form>
+    
+</div>
+{% endblock %}

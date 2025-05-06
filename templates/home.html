@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Добро пожаловать на FlapTask{% endblock %}
+
+{% block content %}
+<div class="welcome-container">
+  <h1>Добро пожаловать на FlapTask!</h1>
+  <p>сервис для управления вашими задачами</p>
+  <div class="buttons">
+    <a href="/login"><button class="btn">Войти</button></a>
+    <a href="/register"><button class="btn">Регистрация</button></a>
+  </div>
+</div>
+<img src="/static/image/Ellipse 1.png" alt="Попугай приветствует вас" class="welcome-parrot">
+{% endblock %}

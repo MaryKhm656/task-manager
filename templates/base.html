@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}FlapTask{% endblock %}</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates&display=swap" rel="stylesheet">
+</head>
+<body>
+<header>
+    <nav>
+        <ul class="navbar">
+            <li><a href="/">Главная</a></li>
+            <li><a href="/tasks">Задачи</a></li>
+            <li><a href="/dashboard">Личный кабинет</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    {% block content %}
+    
+    {% endblock %}
+</main>
+</body>
+</html>
