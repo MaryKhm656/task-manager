@@ -41,7 +41,7 @@
 
 ## Структура проекта
 ```bash
-task-scheduler/                 
+task-manager/                 
 ├── alembic/                         
 ├── app/
 │   ├── api/
