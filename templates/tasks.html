@@ -2,17 +2,24 @@
 
 {% block title %}Задачи{% endblock %}
 
-{%block content%}
+{% block content %}
 <div class="tasks-container">
   <h1>Задачи пользователя {{ user_name }}</h1>
   {% if tasks %}
-    {% for task in tasks %}
-      <div class="task">
-        <h3>{{ task.title }}</h3>
-      </div>
+  {% for task in tasks %}
+  <div class="task 
+    {% if task.status == 'не выполнена' %}status-not-done
+    {% elif task.status == 'в процессе' %}status-in-progress
+    {% elif task.status == 'выполнена' %}status-done
+    {% endif %}">
+    <h3>{{ task.title }}</h3>
+    <form action="/edit-task/{{ task.id }}">
+      <button type="submit">Редактировать</button>
+    </form>
+  </div>
+  {% endfor %}
+  {% else %}
+  <p>У пользователя пока нет задач</p>
+  {% endif %}
 </div>
-{% endfor %}
-{% else %}
-<p>У пользователя пока нет задач</p>
-{% endif %}
-{%endblock%}
+{% endblock %}

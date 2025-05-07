@@ -254,3 +254,37 @@ a {
 .success-buttons > form > button {
     margin-top: 40px;
 }
+
+.tasks-container {
+    display: flex;
+    flex-direction: column;
+    padding-left: 3rem;
+}
+
+.tasks-container>h1 {
+    border-bottom: 1px solid #aeaeae;
+}
+
+.tasks-container .task {
+    text-align: center;
+    width: 300px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #aeaeae;
+    border-radius: 10px;
+    margin-top: 4rem;
+    margin-left: 3rem;
+}
+
+.status-not-done {
+    background-color: #ffe0e0;
+}
+
+.status-in-progress {
+    background-color: #fff7cc;
+}
+
+.status-done {
+    background-color: #e0ffe0;
+}
