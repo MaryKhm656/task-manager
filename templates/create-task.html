@@ -9,40 +9,50 @@
   <p style="color: red">{{ error }}</p>
   {% endif %}
   <p>*поля со звездочкой обязательны для заполнения</p>
+
   <form method="post" action="/create-task">
-    <label for="title">Название задачи *</label>
-    <input type="text" name="title" placeholder="Придумайте название" required>
-    
-    <label for="status">Статус задачи *</label>
-    <select name="status" id="status" required>
-      <option value="не выполнена" selected>Не выполнена</option>
-      <option value="в процессе">В процессе</option>
-      <option value="выполнена">Выполнена</option>
-    </select>
-    
-    <label for="priority">Приоритет задачи *</label>
-    <select name="priority" id="priority" required>
-      <option value="низкий">Низкий</option>
-      <option value="средний" selected>Средний</option>
-      <option value="высокий">Высокий</option>
-    </select>
-    
-    <label for="deadline">Срок выполнения</label>
-    <input type="datetime-local" name="deadline" id="deadline" placeholder="Введите дату в формате YYYY-MM-DD HH:mm">
-    
-    <textarea name="description" placeholder="Комментарии к задаче"></textarea>
-    
-    <div class="categories">
-      <p>Выберите категории</p>
-      {% for category in categories %}
-        <label>
-          <input type="checkbox" name="categories" value="{{ category.id }}">
-          {{ category.title }}
-        </label>
-      {% endfor %}
+    <div class="form-sections">
+      <div class="left-section">
+        <label for="title">Название задачи *</label>
+        <input type="text" name="title" placeholder="Придумайте название" required>
+
+        <label for="status">Статус задачи *</label>
+        <select name="status" id="status" required>
+          <option value="не выполнена" selected>Не выполнена</option>
+          <option value="в процессе">В процессе</option>
+          <option value="выполнена">Выполнена</option>
+        </select>
+
+        <label for="priority">Приоритет задачи *</label>
+        <select name="priority" id="priority" required>
+          <option value="низкий">Низкий</option>
+          <option value="средний" selected>Средний</option>
+          <option value="высокий">Высокий</option>
+        </select>
+
+        <label for="deadline">Срок выполнения</label>
+        <input type="datetime-local" name="deadline" id="deadline">
+
+        <label for="description">Добавьте комментарий</label>
+        <textarea name="description" id="description" placeholder="Комментарии к задаче"></textarea>
+      </div>
+
+      <div class="right-section">
+        <p>Выберите категории</p>
+        <div class="categories">
+          {% for category in categories %}
+          <label>
+            <input type="checkbox" name="categories" value="{{ category.id }}">
+            {{ category.title }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
     </div>
 
-    <button type="submit">Создать задачу</button>
+    <div class="form-submit">
+      <button type="submit">Создать задачу</button>
+    </div>
   </form>
 </div>
 {% endblock %}

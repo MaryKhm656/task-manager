@@ -95,3 +95,4 @@ async def get_create_task(
         categories = fn.get_all_categories()
 ):
     return templates.TemplateResponse("create-task.html", {"request": request, "categories": categories})
+
