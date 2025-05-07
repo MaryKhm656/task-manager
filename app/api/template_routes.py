@@ -96,3 +96,45 @@ async def get_create_task(
 ):
     return templates.TemplateResponse("create-task.html", {"request": request, "categories": categories})
 
+@router.post("/create-task", response_class=HTMLResponse)
+async def post_create_task(
+        request: Request,
+        title: str = Form(...),
+        description: str = Form(None),
+        deadline: str = Form(None),
+        status: str = Form(...),
+        priority: str = Form(...),
+        categories: list[str] = Form(None),
+        current_user: User = Depends(get_current_user_from_cookie)
+):
+    try:
+        if deadline:
+            deadline = deadline.replace("T", " ")
+            
+            fn.create_task(
+                user_id=current_user.id,
+                title=title,
+                description=description,
+                deadline=deadline,
+                categories=categories,
+                status=status,
+                priority=priority
+            )
+            
+            return RedirectResponse(url="/task-creation-success", status_code=HTTP_302_FOUND)
+        
+    except ValueError as e:
+        categories_list = fn.get_all_categories()
+        return templates.TemplateResponse(
+            "create-task.html",
+            {
+                "request": request,
+                "categories": categories_list,
+                "error": str(e)
+            }
+        )
+    
+    
+@router.get("/task-creation-success", response_class=HTMLResponse)
+async def get_success(request: Request, current_user: User = Depends(get_current_user_from_cookie)):
+    return templates.TemplateResponse("task-creation-success.html", {"request": request})

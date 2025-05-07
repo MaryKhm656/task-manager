@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Создание задачи{% endblock %}
+
+{%block content%}
+<div class="success-task">
+  <h1>Задача успешно создана!</h1>
+  <form action="/dashboard" method="get">
+    <button type="submit">Вернуться в личный кабинет</button>
+    </form>
+  
+  <form action="/create-task" method="get">
+    <button type="submit">Создать ещё задачу</button>
+  </form>
+  
+  <form action="/tasks" method="get">
+    <button type="submit">Просмотреть задачи</button>
+  </form>
+</div>
+{% endblock %}
