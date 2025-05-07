@@ -138,3 +138,16 @@ async def post_create_task(
 @router.get("/task-creation-success", response_class=HTMLResponse)
 async def get_success(request: Request, current_user: User = Depends(get_current_user_from_cookie)):
     return templates.TemplateResponse("task-creation-success.html", {"request": request})
+
+
+@router.get("/tasks", response_class=HTMLResponse)
+async def get_all_tasks_user(request: Request, current_user: User = Depends(get_current_user_from_cookie)):
+    tasks = fn.get_all_user_tasks(user_id=current_user.id)
+    return templates.TemplateResponse(
+        "tasks.html",
+        {
+            "request": request,
+            "tasks": tasks,
+            "user_name": current_user.name
+        }
+    )

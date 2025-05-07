@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Задачи{% endblock %}
+
+{%block content%}
+<div class="tasks-container">
+  <h1>Задачи пользователя {{ user_name }}</h1>
+  {% if tasks %}
+    {% for task in tasks %}
+      <div class="task">
+        <h3>{{ task.title }}</h3>
+      </div>
+</div>
+{% endfor %}
+{% else %}
+<p>У пользователя пока нет задач</p>
+{% endif %}
+{%endblock%}
