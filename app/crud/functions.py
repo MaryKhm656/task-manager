@@ -76,7 +76,8 @@ def create_task(user_id: int, title: str, description: str = None, deadline: dat
         )
         
         if categories:
-            found_categories = session.query(Category).filter(Category.title.in_(categories)).all()
+            categories = [int(cat_id) for cat_id in categories]
+            found_categories = session.query(Category).filter(Category.id.in_(categories)).all()
             if len(found_categories) != len(set(categories)):
                 raise ValueError("Одна или несколько категорий не найдена")
             task.categories = found_categories

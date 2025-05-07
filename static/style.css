@@ -233,4 +233,24 @@ a {
     margin-top: 2rem;
 }
 
+.success-task{
+    display: flex;
+    flex-direction: column;
+    padding-left: 100px;
+    padding-top: 100px;
+}
 
+.success-task > h1 {
+    font-family: "Montserrat Alternates", sans-serif;
+    border-bottom: 1px solid #aeaeae;
+}
+
+.success-task .success-buttons {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5rem;
+}
+
+.success-buttons > form > button {
+    margin-top: 40px;
+}
