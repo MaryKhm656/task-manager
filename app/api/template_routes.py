@@ -87,3 +87,11 @@ async def login_form_submit(
 @router.get("/dashboard", response_class=HTMLResponse)
 async def get_user_account(request: Request, current_user: User = Depends(get_current_user_from_cookie)):
     return templates.TemplateResponse("dashboard.html", {"request": request, "user_name": current_user.name, "is_admin": current_user.is_admin})
+
+@router.get("/create-task", response_class=HTMLResponse)
+async def get_create_task(
+        request: Request,
+        current_user: User = Depends(get_current_user_from_cookie),
+        categories = fn.get_all_categories()
+):
+    return templates.TemplateResponse("create-task.html", {"request": request, "categories": categories})

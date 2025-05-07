@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Создание задачи{% endblock %}
+
+{% block content %}
+<div class="create-task-container">
+  <h1>Создание задачи</h1>
+  {% if error %}
+  <p style="color: red">{{ error }}</p>
+  {% endif %}
+  <p>*поля со звездочкой обязательны для заполнения</p>
+  <form method="post" action="/create-task">
+    <label for="title">Название задачи *</label>
+    <input type="text" name="title" placeholder="Придумайте название" required>
+    
+    <label for="status">Статус задачи *</label>
+    <select name="status" id="status" required>
+      <option value="не выполнена" selected>Не выполнена</option>
+      <option value="в процессе">В процессе</option>
+      <option value="выполнена">Выполнена</option>
+    </select>
+    
+    <label for="priority">Приоритет задачи *</label>
+    <select name="priority" id="priority" required>
+      <option value="низкий">Низкий</option>
+      <option value="средний" selected>Средний</option>
+      <option value="высокий">Высокий</option>
+    </select>
+    
+    <label for="deadline">Срок выполнения</label>
+    <input type="datetime-local" name="deadline" id="deadline" placeholder="Введите дату в формате YYYY-MM-DD HH:mm">
+    
+    <textarea name="description" placeholder="Комментарии к задаче"></textarea>
+    
+    <p>Выберите категории</p>
+    {% for category in categories %}
+      <label>
+        <input type="checkbox" name="categories" value="{{ category.id }}">
+        {{ category.title }}
+      </label>
+    {% endfor %}
+
+    <button type="submit">Создать задачу</button>
+  </form>
+</div>
+{% endblock %}
