@@ -32,13 +32,15 @@
     
     <textarea name="description" placeholder="Комментарии к задаче"></textarea>
     
-    <p>Выберите категории</p>
-    {% for category in categories %}
-      <label>
-        <input type="checkbox" name="categories" value="{{ category.id }}">
-        {{ category.title }}
-      </label>
-    {% endfor %}
+    <div class="categories">
+      <p>Выберите категории</p>
+      {% for category in categories %}
+        <label>
+          <input type="checkbox" name="categories" value="{{ category.id }}">
+          {{ category.title }}
+        </label>
+      {% endfor %}
+    </div>
 
     <button type="submit">Создать задачу</button>
   </form>

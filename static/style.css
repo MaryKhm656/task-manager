@@ -162,3 +162,18 @@ a {
 .delete-user-btn:hover {
     background-color: #e48484;
 }
+
+.create-task-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.create-task-container>label {
+    font-family: "Montserrat Alternates", sans-serif;
+    flex-direction: column;
+}
+
+.create-task-container>h1 {
+    font-family: "Montserrat Alternates", sans-serif;
+    border-bottom: 1px solid #aeaeae;
+}
