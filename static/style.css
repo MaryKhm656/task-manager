@@ -288,3 +288,10 @@ a {
 .status-done {
     background-color: #e0ffe0;
 }
+
+.no-task {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5rem;
+    margin-left: 5rem;
+}

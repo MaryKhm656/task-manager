@@ -19,7 +19,12 @@
   </div>
   {% endfor %}
   {% else %}
-  <p>У пользователя пока нет задач</p>
+  <div class="no-task">
+    <p>У пользователя пока нет задач</p>
+    <form action="/create-task" method="get">
+      <button type="submit">Создать задачу</button>
+    </form>
+  </div>
   {% endif %}
 </div>
 {% endblock %}

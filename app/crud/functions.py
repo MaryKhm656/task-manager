@@ -251,6 +251,19 @@ def get_all_user_tasks(user_id: int):
     finally:
         session.close()
 
+def get_user_task_by_id(user_id: int, task_id: int):
+    session = SessionLocal()
+    try:
+        user = session.get(User, user_id)
+        if not user:
+            raise ValueError("Пользователь с таким ID не найден")
+        
+        task_by_id = session.query(Task).options(selectinload(Task.categories)).filter_by(user_id=user_id, task_id=task_id).first()
+        if not task_by_id:
+            raise ValueError("Задача не найдена")
+        return task_by_id
+    finally:
+        session.close()
 
 def get_filtered_tasks(user_id: int, status: Optional[str] = None, priority: Optional[str] = None):
     session = SessionLocal()

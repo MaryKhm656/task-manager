@@ -151,3 +151,18 @@ async def get_all_tasks_user(request: Request, current_user: User = Depends(get_
             "user_name": current_user.name
         }
     )
+
+@router.get("/edit-task/{task_id}", response_class=HTMLResponse)
+async def get_task_by_id(request: Request, 
+                         task_id: int, 
+                         current_user: User = Depends(get_current_user_from_cookie),
+                         categories = fn.get_all_categories()):
+    task_by_id = fn.get_user_task_by_id(user_id=current_user.id, task_id=task_id)
+    return templates.TemplateResponse(
+        "edit-task.html",
+        {
+            "request": request,
+            "task": task_by_id,
+            "categories": categories
+        }
+    )
