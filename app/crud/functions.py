@@ -233,6 +233,76 @@ def update_deadline(user_id: int, task_id: int, new_deadline: datetime):
     finally:
         session.close()
 
+def update_task_full(
+        user_id: int,
+        task_id: int,
+        title: str = None,
+        status: str = None,
+        priority: str = None,
+        deadline: str = None,
+        description: str = None,
+        categories: list[int] = None
+):
+    session = SessionLocal()
+    try:
+        task = session.query(Task).filter_by(id=task_id, user_id=user_id).first()
+        if not task:
+            raise ValueError("Задача не найдена")
+        
+        if title and task.title != title:
+            if not title.strip():
+                raise ValueError("Название задачи не может быть пустым")
+            task.title = title.strip()
+            
+        if description is not None and task.description != description:
+            task.description = description
+
+        if deadline:
+            deadline = deadline.replace("T", " ")
+            try:
+                parsed_deadline = datetime.strptime(deadline, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+                if task.deadline != parsed_deadline:
+                    if parsed_deadline < datetime.now(timezone.utc):
+                        raise ValueError("Дедлайн не может быть в прошлом")
+                    task.deadline = parsed_deadline
+            except ValueError:
+                raise ValueError("Неверный формат даты")
+            
+        if status and task.status != status.lower().strip():
+            clean_status = status.lower().strip()
+            if clean_status not in ALLOWED_STATUSES:
+                raise ValueError("Недопустимый статус")
+            task.status = clean_status
+            
+        if priority and task.priority != priority.lower().strip():
+            clean_priority = priority.lower().strip()
+            if clean_priority not in ALLOWED_PRIORITIES:
+                raise ValueError("Недопустимый приоритет")
+            task.priority = clean_priority
+            
+        if categories is not None:
+            new_ids = set(map(int, categories))
+            current_ids = set([c.id for c in task.categories])
+            if new_ids != current_ids:
+                found_cats = session.query(Category).filter(Category.id.in_(new_ids)).all()
+                if len(found_cats) != len(new_ids):
+                    raise ValueError("Одна или несколько категорий не найдены")
+                task.categories = found_cats
+                
+        session.commit()
+        session.refresh(task)
+        task_with_categories = (
+            session.query(Task)
+            .options(selectinload(Task.categories))
+            .filter(Task.id == task.id)
+            .first()
+        )
+        return task_with_categories
+    finally:
+        session.close()
+
+        
+        
 
 def get_all_user_tasks(user_id: int):
     session = SessionLocal()
