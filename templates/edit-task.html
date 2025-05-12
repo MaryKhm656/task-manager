@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактирование задачи{% endblock %}
+
+{% block content %}
+<div class="edit-task-container">
+    <h1>Редактирование задачи</h1>
+    {% if success %}
+    <p style="color: green" class="success-message">Изменения успешно сохранены!</p>
+    {% elif error %}
+    <p style="color: red" class="error-message">{{ error }}</p>
+    {% endif %}
+    
+    <form method="post" action="/edit-task/{{ task.id }}">
+        <div class="form-sections">
+            <div class="left-section">
+                <label for="title">Название задачи</label>
+                <input type="text" id="title" name="title" value="{{ task.title or '' }}" required>
+            
+                <label for="status">Статус задачи</label>
+                <select name="status" id="status" required>
+                    {% for s in allowed_statuses %}
+                    <option value="{{ s }}" {% if s == task.status %}selected{% endif %}>{{ s.capitalize() }}</option>
+                    {% endfor %}
+                </select>
+            
+                <label for="priority">Приоритет задачи</label>
+                <select name="priority" id="priority" required>
+                    {% for p in allowed_priorities %}
+                    <option value="{{ p }}" {% if p == task.priority %}selected{% endif %}>{{ p.capitalize() }}</option>
+                    {% endfor %}
+                </select>
+            
+                <label for="deadline">Срок выполнения</label>
+                <input type="datetime-local" name="deadline" id="deadline" value="{{ task.deadline.strftime('%Y-%m-%dT%H:%M') if task.deadline else '' }}">
+            
+                <label for="description">Комментарии к задаче</label>
+                <textarea name="description" id="description">{{ task.description or '' }}</textarea>
+            </div>
+            
+            <div class="right-section">
+                <p>Категории</p>
+                <div class="categories">
+                    {% for category in categories %}
+                    <label>
+                        <input type="checkbox" name="categories" value="{{ category.id }}" 
+                               {% for c in task.categories %}
+                                    {% if c.id == category.id %}checked{% endif %}
+                                {% endfor %}>
+                        {{ category.title }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-submit">
+            <button type="submit">Сохранить изменения</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

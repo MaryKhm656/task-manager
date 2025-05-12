@@ -328,7 +328,7 @@ def get_user_task_by_id(user_id: int, task_id: int):
         if not user:
             raise ValueError("Пользователь с таким ID не найден")
         
-        task_by_id = session.query(Task).options(selectinload(Task.categories)).filter_by(user_id=user_id, task_id=task_id).first()
+        task_by_id = session.query(Task).options(selectinload(Task.categories)).filter_by(user_id=user_id, id=task_id).first()
         if not task_by_id:
             raise ValueError("Задача не найдена")
         return task_by_id

@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.crud import functions as fn
 from app.api.schemas import UserCreate
 from app.db.models import User
+from app.crud.constants import ALLOWED_STATUSES, ALLOWED_PRIORITIES
 from app.crud.auth import login_user, get_current_user_from_cookie
 
 templates = Jinja2Templates(directory="templates")
@@ -163,6 +164,8 @@ async def get_task_by_id(request: Request,
         {
             "request": request,
             "task": task_by_id,
-            "categories": categories
+            "categories": categories,
+            "allowed_statuses": ALLOWED_STATUSES,
+            "allowed_priorities": ALLOWED_PRIORITIES
         }
     )
