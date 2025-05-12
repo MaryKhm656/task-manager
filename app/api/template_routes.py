@@ -169,3 +169,58 @@ async def get_task_by_id(request: Request,
             "allowed_priorities": ALLOWED_PRIORITIES
         }
     )
+
+@router.post("/edit-task/{task_id}", response_class=HTMLResponse)
+async def post_edit_task(
+        request: Request,
+        task_id: int,
+        title: str = Form(...),
+        description: str = Form(None),
+        deadline: str = Form(None),
+        status: str = Form(...),
+        priority: str = Form(...),
+        categories: list[str] = Form(None),
+        current_user: User = Depends(get_current_user_from_cookie)
+):
+    try:
+        if deadline:
+            deadline = deadline.replace("T", " ")
+            
+        updated_task = fn.update_task_full(
+            user_id=current_user.id,
+            task_id=task_id,
+            title=title,
+            status=status,
+            priority=priority,
+            deadline=deadline,
+            description=description,
+            categories=categories
+        )
+            
+        all_categories = fn.get_all_categories()
+        return templates.TemplateResponse(
+            "edit-task.html",
+            {
+                "request": request,
+                "task": updated_task,
+                "categories": all_categories,
+                "allowed_statuses": ALLOWED_STATUSES,
+                "allowed_priorities": ALLOWED_PRIORITIES,
+                "success": True
+            }
+        )
+        
+    except ValueError as e:
+        all_categories = fn.get_all_categories()
+        task = fn.get_user_task_by_id(user_id=current_user.id, task_id=task_id)
+        return templates.TemplateResponse(
+            "edit-task.html",
+            {
+                "request": request,
+                "task": task,
+                "categories": all_categories,
+                "allowed_statuses": ALLOWED_STATUSES,
+                "allowed_priorities": ALLOWED_PRIORITIES,
+                "error": str(e)
+            }
+        )
