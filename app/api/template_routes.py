@@ -153,6 +153,32 @@ async def get_all_tasks_user(request: Request, current_user: User = Depends(get_
         }
     )
 
+@router.post("/tasks/{task_id}", response_class=HTMLResponse)
+async def delete_task(request: Request, task_id: int, current_user: User = Depends(get_current_user_from_cookie)):
+    try:
+        fn.delete_task(user_id=current_user.id, task_id=task_id)
+        tasks = fn.get_all_user_tasks(user_id=current_user.id)
+        return templates.TemplateResponse(
+            "tasks.html",
+            {
+                "request": request,
+                "tasks": tasks,
+                "user_name": current_user.name,
+                "success": True
+            }
+        )
+    except ValueError as e:
+        tasks = fn.get_all_user_tasks(user_id=current_user.id)
+        return templates.TemplateResponse(
+            "tasks.html",
+            {
+                "request": request,
+                "tasks": tasks,
+                "user_name": current_user.name,
+                "error": str(e)
+            }
+        )
+
 @router.get("/edit-task/{task_id}", response_class=HTMLResponse)
 async def get_task_by_id(request: Request, 
                          task_id: int, 

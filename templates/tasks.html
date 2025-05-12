@@ -5,6 +5,11 @@
 {% block content %}
 <div class="tasks-container">
   <h1>Задачи пользователя {{ user_name }}</h1>
+  {% if success %}
+  <p style="color: green;">Задача успешно удалена</p>
+  {% elif error %}
+  <p style="color: red;">{{ error }}</p>
+  {% endif %}
   {% if tasks %}
   {% for task in tasks %}
   <div class="task 
@@ -12,9 +17,12 @@
     {% elif task.status == 'в процессе' %}status-in-progress
     {% elif task.status == 'выполнена' %}status-done
     {% endif %}">
-    <h3>{{ task.title }}</h3>
+    <h2>{{ task.title }}</h2>
     <form action="/edit-task/{{ task.id }}">
       <button type="submit">Редактировать</button>
+    </form>
+    <form action="/tasks/{{ task.id }}" method="post">
+      <button type="submit" class="del-task-but">Удалить задачу</button>
     </form>
   </div>
   {% endfor %}

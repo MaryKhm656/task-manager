@@ -265,6 +265,10 @@ a {
     border-bottom: 1px solid #aeaeae;
 }
 
+.tasks-container>h2 {
+    border-bottom: 2px solid #aeaeae;
+}
+
 .tasks-container .task {
     text-align: center;
     width: 300px;
@@ -275,6 +279,11 @@ a {
     border-radius: 10px;
     margin-top: 4rem;
     margin-left: 3rem;
+}
+
+.del-task-but {
+    background-color: #e48484;
+    margin-top: 2rem;
 }
 
 .status-not-done {
