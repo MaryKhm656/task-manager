@@ -302,7 +302,6 @@ def update_task_full(
         session.close()
 
         
-        
 
 def get_all_user_tasks(user_id: int):
     session = SessionLocal()

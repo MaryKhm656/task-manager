@@ -271,3 +271,15 @@ async def post_edit_task(
                 "error": str(e)
             }
         )
+    
+@router.get("/edit-categories", response_class=HTMLResponse)
+async def get_edit_categories(request: Request, current_user: User = Depends(get_current_user_from_cookie)):
+    all_categories = fn.get_all_categories()
+    return templates.TemplateResponse(
+        "edit-categories.html",
+        {
+            "request": request,
+            "categories": all_categories,
+            "is_admin": current_user.is_admin
+        }
+    )

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактирование категорий{% endblock %}
+
+{% block content %}
+{% if is_admin %}
+<div class="edit-categories-container">
+  <h1>Редактирование категорий</h1>
+
+  {% if error %}
+  <p style="color: red">{{ error }}</p>
+  {% elif success %}
+  <p style="color: green">Данные успешно изменены</p>
+  {% endif %}
+
+  <div class="left-block">
+    <h2>Добавление новых категорий</h2>
+    <form action="/edit-categories" method="post">
+      <label for="title">Название категории</label>
+      <input type="text" name="title" id="title" required>
+      <button type="submit">Добавить категорию</button>
+    </form>
+  </div>
+
+  <div class="right-block">
+    <h2>Удаление категорий</h2>
+    <form action="/edit-categories" method="post">
+      <div class="categories">
+        {% for category in categories %}
+        <label>
+          <input type="checkbox" name="categories" value="{{ category.id }}">
+          {{ category.title }}
+        </label>
+        {% endfor %}
+      </div>
+      <button type="submit">Удалить выбранные категории</button>
+    </form>
+  </div>
+</div>
+
+{% else %}
+<p>Данные действия доступны только администратору</p>
+{% endif %}
+{% endblock %}
