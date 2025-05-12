@@ -8,6 +8,9 @@
 <div class="dashboard-buttons">
     <h1>Личный кабинет</h1>
     <p>Приветствуем, {{ user_name }}!</p>
+    {% if error %}
+    <p style="color: red">{{ error }}</p>
+    {% endif %}
     <form action="/create-task" method="get">
         <button type="submit">Создать задачу</button>
     </form>
@@ -20,7 +23,7 @@
         <button type="submit">Редактировать категории</button>
     </form>
     {% endif %}
-    <form action="/delete-account" method="post" onsubmit="return confirm('Точно удалить аккаунт?');">
+    <form action="/dashboard" method="post" onsubmit="return confirm('Точно удалить аккаунт?');">
 
         <button class="delete-user-btn" type="submit">Удалить аккаунт</button>
     </form>

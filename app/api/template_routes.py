@@ -89,6 +89,27 @@ async def login_form_submit(
 async def get_user_account(request: Request, current_user: User = Depends(get_current_user_from_cookie)):
     return templates.TemplateResponse("dashboard.html", {"request": request, "user_name": current_user.name, "is_admin": current_user.is_admin})
 
+@router.post("/dashboard", response_class=HTMLResponse)
+async def post_del_user(request: Request, current_user: User = Depends(get_current_user_from_cookie)):
+    try:
+        fn.delete_user(user_id=current_user.id)
+        response = RedirectResponse(url="/delete-account-success", status_code=HTTP_302_FOUND)
+        response.delete_cookie("access_token")
+        return response
+    except ValueError as e:
+        return templates.TemplateResponse(
+            "dashboard.html",
+            {
+                "request": request,
+                "user_name": current_user.name,
+                "error": str(e)
+            }
+        )
+
+@router.get("/delete-account-success", response_class=HTMLResponse)
+async def delete_account(request: Request):
+    return templates.TemplateResponse("delete-account-success.html", {"request": request})
+
 @router.get("/create-task", response_class=HTMLResponse)
 async def get_create_task(
         request: Request,

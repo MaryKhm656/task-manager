@@ -304,3 +304,19 @@ a {
     margin-top: 5rem;
     margin-left: 5rem;
 }
+
+.delete-account-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.delete-account-container > h1 {
+    border-bottom: 1px solid #aeaeae;
+}
+
+.delete-account-form {
+    display: flex;
+    margin-top: 9rem;
+    margin-left: 5rem;
+    gap: 3rem;
+}

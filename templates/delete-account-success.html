@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление аккаунта{% endblock %}
+
+{% block content %}
+<div class="delete-account-container">
+  <h1>Аккаунт успешно удален!</h1>
+  <div class="delete-account-form">
+    <form action="/" method="get">
+      <button type="submit">Вернуться на главную</button>
+    </form>
+  
+    <form action="/register" method="get">
+      <button type="submit">Регистрация</button>
+    </form>
+  
+    <form action="/login" method="get">
+      <button type="submit">Войти</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
