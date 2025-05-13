@@ -55,7 +55,7 @@ def login_user(email: str, password: str):
     session.close()
     
     if user is None or not verify_password(password, user.password):
-        raise HTTPException(status_code=401, detail="Неверный email или пароль")
+        raise ValueError("Неверный email или пароль")
     
     access_token = create_access_token(data={"sub": str(user.id)})
     return access_token
