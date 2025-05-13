@@ -15,7 +15,7 @@
 
   <div class="left-block">
     <h2>Добавление новых категорий</h2>
-    <form action="/edit-categories" method="post">
+    <form action="/add-categories" method="post">
       <label for="title">Название категории</label>
       <input type="text" name="title" id="title" required>
       <button type="submit">Добавить категорию</button>
@@ -24,7 +24,7 @@
 
   <div class="right-block">
     <h2>Удаление категорий</h2>
-    <form action="/edit-categories" method="post">
+    <form action="/delete-categories" method="post">
       <div class="categories">
         {% for category in categories %}
         <label>

@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -74,13 +75,13 @@ async def login_form_submit(
         return response
     except ValueError as e:
         return templates.TemplateResponse(
-            "register.html",
+            "login.html",
             {'request': request, 'error': str(e)},
             status_code=400
         )
     except SQLAlchemyError:
         return templates.TemplateResponse(
-            "register.html",
+            "login.html",
             {'request': request, 'error': "Ошибка при работе с базой данных"},
             status_code=500
         )
@@ -273,13 +274,49 @@ async def post_edit_task(
         )
     
 @router.get("/edit-categories", response_class=HTMLResponse)
-async def get_edit_categories(request: Request, current_user: User = Depends(get_current_user_from_cookie)):
+async def get_edit_categories(
+        request: Request,
+        current_user: User = Depends(get_current_user_from_cookie),
+        error: Optional[str] = None,
+        success: Optional[str] = None
+):
     all_categories = fn.get_all_categories()
     return templates.TemplateResponse(
         "edit-categories.html",
         {
             "request": request,
             "categories": all_categories,
-            "is_admin": current_user.is_admin
+            "is_admin": current_user.is_admin,
+            "error": error,
+            "success": success == "True"
         }
     )
+
+@router.post("/add-categories", response_class=HTMLResponse)
+async def post_add_category(
+        request: Request,
+        title: str = Form(...),
+        current_user: User = Depends(get_current_user_from_cookie)
+):
+    try:
+        if not current_user.is_admin:
+            raise ValueError("Доступ запрещен")
+        fn.create_category(title=title)
+        
+        return RedirectResponse("/edit-categories?success=True", status_code=302)
+    except ValueError as e:
+        return RedirectResponse(f"/edit-categories?error={str(e)}", status_code=400)
+    
+@router.post("/delete-categories", response_class=HTMLResponse)
+async def post_del_category(
+        request: Request,
+        categories: list[int] = Form(...),
+        current_user: User = Depends(get_current_user_from_cookie)
+):
+    try:
+        if not current_user.is_admin:
+            raise ValueError("Доступ запрещен")
+        fn.delete_categories_list(categories)
+        return RedirectResponse("/edit-categories?success=True", status_code=302)
+    except ValueError as e:
+        return RedirectResponse(f"/edit-categories?error={str(e)}", status_code=400)

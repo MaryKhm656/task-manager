@@ -401,3 +401,16 @@ def delete_category(category_id: int):
         return "Категория успешно удалена"
     finally:
         session.close()
+        
+def delete_categories_list(category_ids: list[int]):
+    session = SessionLocal()
+    try:
+        for category_id in category_ids:
+            category = session.get(Category, category_id)
+            if not category:
+                raise ValueError(f"Категория с {category_id} не найдена")
+            session.delete(category)
+        session.commit()
+        return "Категории успешно удалены"
+    finally:
+        session.close()

@@ -4,6 +4,9 @@
 
 {% block content %}
 <div class="welcome-container">
+  {% if error %}
+  <p style="color: red">{{ error }}</p>
+  {% endif %}
   <h1>Добро пожаловать на FlapTask!</h1>
   <p>сервис для управления вашими задачами</p>
   <div class="buttons">
