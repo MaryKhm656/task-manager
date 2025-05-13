@@ -1,4 +1,5 @@
 from typing import Optional
+from pydantic import ValidationError
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -29,8 +30,9 @@ async def register_form_submit(
         email: str = Form(...),
         password: str = Form(...)
 ):
-    user_data = UserCreate(name=name, email=email, password=password)
+    
     try:
+        user_data = UserCreate(name=name, email=email, password=password)
         fn.create_user(
             name=user_data.name,
             email=user_data.email,
@@ -39,12 +41,23 @@ async def register_form_submit(
 
         return RedirectResponse(url="/login", status_code=HTTP_302_FOUND)
 
+    except ValidationError as e:
+        error_msgs = [f"{err['loc'][0]}: {err['msg']}" for err in e.errors()]
+        return templates.TemplateResponse(
+            "register.html",
+            {'request': request, 'error': " | ".join(error_msgs)},
+            status_code=400
+        )
+    
     except ValueError as e:
         return templates.TemplateResponse(
             "register.html",
-            {'request': request, 'error': str(e)},
-            status_code=400
+            {
+                "request": request,
+                "error": str(e)
+            }
         )
+    
     except SQLAlchemyError:
         return templates.TemplateResponse(
             "register.html",
