@@ -65,10 +65,16 @@ task-manager/
 │   └── style.css
 ├── templates/
 │   └── base.html
+│   └── create-task.html
 │   └── dashboard.html
+│   └── delete-account-success.html
+│   └── edit-categories.html
+│   └── edit-task.html
 │   └── home.html
 │   └── login.html
 │   └── register.html
+│   └── task-creation-success.html
+│   └── tasks.html
 ├── main.py
 ├── .gitignore
 ├── README.md
