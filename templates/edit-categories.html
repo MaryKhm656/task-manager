@@ -13,6 +13,7 @@
   <p style="color: green">Данные успешно изменены</p>
   {% endif %}
 
+  <div class="form-edit-categories">
   <div class="left-block">
     <h2>Добавление новых категорий</h2>
     <form action="/add-categories" method="post">
@@ -37,7 +38,7 @@
     </form>
   </div>
 </div>
-
+</div>
 {% else %}
 <p>Данные действия доступны только администратору</p>
 {% endif %}
