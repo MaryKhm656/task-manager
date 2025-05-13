@@ -43,20 +43,25 @@ def create_task(user_id: int, title: str, description: str = None, deadline: dat
         raise ValueError("Название задачи не может быть пустым")
 
     if isinstance(deadline, str):
-        try:
-            deadline = datetime.strptime(deadline, "%Y-%m-%d %H:%M")
-        except ValueError:
-            raise ValueError("Неверный формат даты. Ожидается формат: 'YYYY-MM-DD HH:MM'")
+        if not deadline.strip():
+            deadline = None
+        else:
+            try:
+                deadline = datetime.strptime(deadline, "%Y-%m-%d %H:%M")
+            except ValueError:
+                raise ValueError("Неверный формат даты. Ожидается формат: 'YYYY-MM-DD HH:MM'")
+    if deadline and deadline < datetime.now():
+        raise ValueError("Нельзя установить дедлайн в прошлом")
 
     session = SessionLocal()
     try:
         user = session.get(User, user_id)
         if not user:
-            raise ValueError(f"Пользователь с ID {user_id} не найден")
+            raise ValueError("Пользователь не найден")
 
         existing = session.query(Task).filter_by(user_id=user_id, title=title).first()
         if existing:
-            raise ValueError(f"Такая задача у пользователя ID {user_id} уже существует")
+            raise ValueError(f"Такая задача у пользователя {user.name} уже существует")
 
         clean_status = status.lower().strip()
         clean_priority = priority.lower().strip()

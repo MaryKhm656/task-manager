@@ -147,17 +147,17 @@ async def post_create_task(
         if deadline:
             deadline = deadline.replace("T", " ")
             
-            fn.create_task(
-                user_id=current_user.id,
-                title=title,
-                description=description,
-                deadline=deadline,
-                categories=categories,
-                status=status,
-                priority=priority
-            )
+        fn.create_task(
+            user_id=current_user.id,
+            title=title,
+            description=description,
+            deadline=deadline,
+            categories=categories,
+            status=status,
+            priority=priority
+        )
             
-            return RedirectResponse(url="/task-creation-success", status_code=HTTP_302_FOUND)
+        return RedirectResponse(url="/task-creation-success", status_code=HTTP_302_FOUND)
         
     except ValueError as e:
         categories_list = fn.get_all_categories()
