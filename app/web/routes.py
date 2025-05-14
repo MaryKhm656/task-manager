@@ -6,7 +6,6 @@ from fastapi.templating import Jinja2Templates
 from starlette.status import HTTP_302_FOUND
 from sqlalchemy.exc import SQLAlchemyError
 from app.crud import functions as fn
-from app.api.schemas import UserCreate
 from app.db.models import User
 from app.crud.constants import ALLOWED_STATUSES, ALLOWED_PRIORITIES
 from app.crud.auth import login_user, get_current_user_from_cookie
@@ -32,12 +31,7 @@ async def register_form_submit(
 ):
     
     try:
-        user_data = UserCreate(name=name, email=email, password=password)
-        fn.create_user(
-            name=user_data.name,
-            email=user_data.email,
-            password=user_data.password
-        )
+        fn.create_user(name=name, email=email, password=password)
 
         return RedirectResponse(url="/login", status_code=HTTP_302_FOUND)
 

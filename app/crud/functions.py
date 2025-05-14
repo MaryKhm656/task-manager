@@ -13,6 +13,8 @@ def create_user(name: str, email: str, password: str):
 
     session = SessionLocal()
     try:
+        if "@" not in email and "." not in email:
+            raise ValueError("Некорректный email")
         existing_user = session.query(User).filter_by(email=email).first()
         if existing_user:
             raise ValueError("Аккаунт с таким email уже существует!")
