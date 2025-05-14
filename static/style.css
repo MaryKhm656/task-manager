@@ -25,14 +25,6 @@ h1 {
     color: #000;
 }
 
-.welcome-parrot {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 20%;
-    height:auto;
-}
-
 p {
     font-family: "Montserrat Alternates", sans-serif;
     font-size: 30px;
