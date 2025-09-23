@@ -23,17 +23,6 @@ from app.db.models import Category
 #         session.close()
 
 
-# def login_user(email: str, password: str):
-#     session = SessionLocal()
-#     try:
-#         user = session.query(User).filter_by(email=email).first()
-#         if not user or not verify_password(password, user.password):
-#             raise ValueError("Неверный email или пароль")
-#         return user
-#     finally:
-#         session.close()
-
-
 # def create_task(
 #     user_id: int,
 #     title: str,
