@@ -1,11 +1,14 @@
+from datetime import datetime, timezone
+from typing import Optional
+
 from sqlalchemy import func
 from sqlalchemy.orm import selectinload
-from app.db.models import User, Task, Category
-from app.db.database import SessionLocal
-from datetime import datetime, timezone
-from app.crud.constants import ALLOWED_STATUSES, ALLOWED_PRIORITIES
+
+from app.crud.constants import ALLOWED_PRIORITIES, ALLOWED_STATUSES
 from app.crud.security import hash_password, verify_password
-from typing import Optional
+from app.db.database import SessionLocal
+from app.db.models import Category, Task, User
+
 
 def create_user(name: str, email: str, password: str):
     if len(name) < 2:
@@ -40,7 +43,15 @@ def login_user(email: str, password: str):
         session.close()
 
 
-def create_task(user_id: int, title: str, description: str = None, deadline: datetime = None, categories: list[str] = None, status: str = "не выполнена", priority: str = "средний"):
+def create_task(
+    user_id: int,
+    title: str,
+    description: str = None,
+    deadline: datetime = None,
+    categories: list[str] = None,
+    status: str = "не выполнена",
+    priority: str = "средний",
+):
     if not title.strip():
         raise ValueError("Название задачи не может быть пустым")
 
@@ -51,7 +62,9 @@ def create_task(user_id: int, title: str, description: str = None, deadline: dat
             try:
                 deadline = datetime.strptime(deadline, "%Y-%m-%d %H:%M")
             except ValueError:
-                raise ValueError("Неверный формат даты. Ожидается формат: 'YYYY-MM-DD HH:MM'")
+                raise ValueError(
+                    "Неверный формат даты. Ожидается формат: 'YYYY-MM-DD HH:MM'"
+                )
     if deadline and deadline < datetime.now():
         raise ValueError("Нельзя установить дедлайн в прошлом")
 
@@ -79,16 +92,18 @@ def create_task(user_id: int, title: str, description: str = None, deadline: dat
             description=description,
             deadline=deadline,
             status=clean_status,
-            priority=clean_priority
+            priority=clean_priority,
         )
-        
+
         if categories:
             categories = [int(cat_id) for cat_id in categories]
-            found_categories = session.query(Category).filter(Category.id.in_(categories)).all()
+            found_categories = (
+                session.query(Category).filter(Category.id.in_(categories)).all()
+            )
             if len(found_categories) != len(set(categories)):
                 raise ValueError("Одна или несколько категорий не найдена")
             task.categories = found_categories
-        
+
         session.add(task)
         session.commit()
         session.refresh(task)
@@ -122,15 +137,17 @@ def create_category(title: str):
         return category
     finally:
         session.close()
-        
-        
+
+
 def update_task_categories(user_id: int, task_id: int, new_categories: list[str]):
     session = SessionLocal()
     try:
         task = session.query(Task).filter_by(id=task_id, user_id=user_id).first()
         if not task:
             raise ValueError("Задача с таким ID у пользователя не найдена")
-        task.categories = session.query(Category).filter(Category.title.in_(new_categories)).all()
+        task.categories = (
+            session.query(Category).filter(Category.title.in_(new_categories)).all()
+        )
         session.commit()
         session.refresh(task)
         task_with_categories = (
@@ -142,8 +159,8 @@ def update_task_categories(user_id: int, task_id: int, new_categories: list[str]
         return task_with_categories
     finally:
         session.close()
-        
-        
+
+
 def update_task_status(user_id: int, task_id: int, new_status: str):
     session = SessionLocal()
     try:
@@ -165,8 +182,8 @@ def update_task_status(user_id: int, task_id: int, new_status: str):
         return task_with_categories
     finally:
         session.close()
-        
-        
+
+
 def update_task_priority(user_id: int, task_id: int, new_priority: str):
     session = SessionLocal()
     try:
@@ -188,8 +205,8 @@ def update_task_priority(user_id: int, task_id: int, new_priority: str):
         return task_with_categories
     finally:
         session.close()
-        
-        
+
+
 def update_description(user_id: int, task_id: int, new_description: str):
     session = SessionLocal()
     try:
@@ -240,62 +257,67 @@ def update_deadline(user_id: int, task_id: int, new_deadline: datetime):
     finally:
         session.close()
 
+
 def update_task_full(
-        user_id: int,
-        task_id: int,
-        title: str = None,
-        status: str = None,
-        priority: str = None,
-        deadline: str = None,
-        description: str = None,
-        categories: list[int] = None
+    user_id: int,
+    task_id: int,
+    title: str = None,
+    status: str = None,
+    priority: str = None,
+    deadline: str = None,
+    description: str = None,
+    categories: list[int] = None,
 ):
     session = SessionLocal()
     try:
         task = session.query(Task).filter_by(id=task_id, user_id=user_id).first()
         if not task:
             raise ValueError("Задача не найдена")
-        
+
         if title and task.title != title:
             if not title.strip():
                 raise ValueError("Название задачи не может быть пустым")
             task.title = title.strip()
-            
+
         if description is not None and task.description != description:
             task.description = description
 
         if deadline:
             deadline = deadline.replace("T", " ")
             try:
-                parsed_deadline = datetime.strptime(deadline, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+                parsed_deadline = datetime.strptime(deadline, "%Y-%m-%d %H:%M").replace(
+                    tzinfo=timezone.utc
+                )
                 if task.deadline != parsed_deadline:
                     if parsed_deadline < datetime.now(timezone.utc):
                         raise ValueError("Дедлайн не может быть в прошлом")
                     task.deadline = parsed_deadline
             except ValueError:
                 raise ValueError("Неверный формат даты")
-            
+
         if status and task.status != status.lower().strip():
             clean_status = status.lower().strip()
             if clean_status not in ALLOWED_STATUSES:
                 raise ValueError("Недопустимый статус")
             task.status = clean_status
-            
+
         if priority and task.priority != priority.lower().strip():
             clean_priority = priority.lower().strip()
             if clean_priority not in ALLOWED_PRIORITIES:
                 raise ValueError("Недопустимый приоритет")
             task.priority = clean_priority
-            
+
         if categories is not None:
             new_ids = set(map(int, categories))
             current_ids = set([c.id for c in task.categories])
             if new_ids != current_ids:
-                found_cats = session.query(Category).filter(Category.id.in_(new_ids)).all()
+                found_cats = (
+                    session.query(Category).filter(Category.id.in_(new_ids)).all()
+                )
                 if len(found_cats) != len(new_ids):
                     raise ValueError("Одна или несколько категорий не найдены")
                 task.categories = found_cats
-                
+
         session.commit()
         session.refresh(task)
         task_with_categories = (
@@ -308,7 +330,6 @@ def update_task_full(
     finally:
         session.close()
 
-        
 
 def get_all_user_tasks(user_id: int):
     session = SessionLocal()
@@ -327,21 +348,30 @@ def get_all_user_tasks(user_id: int):
     finally:
         session.close()
 
+
 def get_user_task_by_id(user_id: int, task_id: int):
     session = SessionLocal()
     try:
         user = session.get(User, user_id)
         if not user:
             raise ValueError("Пользователь с таким ID не найден")
-        
-        task_by_id = session.query(Task).options(selectinload(Task.categories)).filter_by(user_id=user_id, id=task_id).first()
+
+        task_by_id = (
+            session.query(Task)
+            .options(selectinload(Task.categories))
+            .filter_by(user_id=user_id, id=task_id)
+            .first()
+        )
         if not task_by_id:
             raise ValueError("Задача не найдена")
         return task_by_id
     finally:
         session.close()
 
-def get_filtered_tasks(user_id: int, status: Optional[str] = None, priority: Optional[str] = None):
+
+def get_filtered_tasks(
+    user_id: int, status: Optional[str] = None, priority: Optional[str] = None
+):
     session = SessionLocal()
     try:
         query = (
@@ -355,7 +385,9 @@ def get_filtered_tasks(user_id: int, status: Optional[str] = None, priority: Opt
             query = query.filter(func.lower(Task.status) == func.lower(clean_status))
         if priority:
             clean_priority = priority.strip()
-            query = query.filter(func.lower(Task.priority) == func.lower(clean_priority))
+            query = query.filter(
+                func.lower(Task.priority) == func.lower(clean_priority)
+            )
         tasks = query.all()
         return tasks
     finally:
@@ -369,8 +401,8 @@ def get_all_categories():
         return categories
     finally:
         session.close()
-        
-        
+
+
 def delete_task(user_id: int, task_id: int):
     session = SessionLocal()
     try:
@@ -382,8 +414,8 @@ def delete_task(user_id: int, task_id: int):
         return "Задача успешно удалена"
     finally:
         session.close()
-        
-        
+
+
 def delete_user(user_id: int):
     session = SessionLocal()
     try:
@@ -395,8 +427,8 @@ def delete_user(user_id: int):
         return "Пользователь успешно удален"
     finally:
         session.close()
-        
-        
+
+
 def delete_category(category_id: int):
     session = SessionLocal()
     try:
@@ -408,7 +440,8 @@ def delete_category(category_id: int):
         return "Категория успешно удалена"
     finally:
         session.close()
-        
+
+
 def delete_categories_list(category_ids: list[int]):
     session = SessionLocal()
     try:
