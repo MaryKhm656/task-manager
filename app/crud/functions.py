@@ -99,24 +99,24 @@ from app.db.models import Category
 #         session.close()
 
 
-def create_category(title: str):
-    clean_title = title.lower().strip()
-    if not clean_title:
-        raise ValueError("Название категории не может быть пустым")
-
-    session = SessionLocal()
-    try:
-        existing = session.query(Category).filter_by(title=clean_title).first()
-        if existing:
-            raise ValueError("Такая категория уже существует")
-
-        category = Category(title=clean_title)
-        session.add(category)
-        session.commit()
-        session.refresh(category)
-        return category
-    finally:
-        session.close()
+# def create_category(title: str):
+#     clean_title = title.lower().strip()
+#     if not clean_title:
+#         raise ValueError("Название категории не может быть пустым")
+#
+#     session = SessionLocal()
+#     try:
+#         existing = session.query(Category).filter_by(title=clean_title).first()
+#         if existing:
+#             raise ValueError("Такая категория уже существует")
+#
+#         category = Category(title=clean_title)
+#         session.add(category)
+#         session.commit()
+#         session.refresh(category)
+#         return category
+#     finally:
+#         session.close()
 
 
 # def update_task_categories(user_id: int, task_id: int, new_categories: list[str]):
@@ -374,13 +374,13 @@ def create_category(title: str):
 #         session.close()
 
 
-def get_all_categories():
-    session = SessionLocal()
-    try:
-        categories = session.query(Category).all()
-        return categories
-    finally:
-        session.close()
+# def get_all_categories():
+#     session = SessionLocal()
+#     try:
+#         categories = session.query(Category).all()
+#         return categories
+#     finally:
+#         session.close()
 
 
 # def delete_task(user_id: int, task_id: int):
@@ -409,28 +409,28 @@ def get_all_categories():
 #         session.close()
 
 
-def delete_category(category_id: int):
-    session = SessionLocal()
-    try:
-        category = session.get(Category, category_id)
-        if not category:
-            raise ValueError("Категория с таким ID не найдена")
-        session.delete(category)
-        session.commit()
-        return "Категория успешно удалена"
-    finally:
-        session.close()
-
-
-def delete_categories_list(category_ids: list[int]):
-    session = SessionLocal()
-    try:
-        for category_id in category_ids:
-            category = session.get(Category, category_id)
-            if not category:
-                raise ValueError(f"Категория с {category_id} не найдена")
-            session.delete(category)
-        session.commit()
-        return "Категории успешно удалены"
-    finally:
-        session.close()
+# def delete_category(category_id: int):
+#     session = SessionLocal()
+#     try:
+#         category = session.get(Category, category_id)
+#         if not category:
+#             raise ValueError("Категория с таким ID не найдена")
+#         session.delete(category)
+#         session.commit()
+#         return "Категория успешно удалена"
+#     finally:
+#         session.close()
+#
+#
+# def delete_categories_list(category_ids: list[int]):
+#     session = SessionLocal()
+#     try:
+#         for category_id in category_ids:
+#             category = session.get(Category, category_id)
+#             if not category:
+#                 raise ValueError(f"Категория с {category_id} не найдена")
+#             session.delete(category)
+#         session.commit()
+#         return "Категории успешно удалены"
+#     finally:
+#         session.close()
