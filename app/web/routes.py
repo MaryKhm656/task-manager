@@ -5,12 +5,18 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 from starlette.status import HTTP_302_FOUND
 
 from app.crud import functions as fn
 from app.crud.auth import get_current_user_from_cookie, login_user
 from app.crud.constants import ALLOWED_PRIORITIES, ALLOWED_STATUSES
 from app.db.models import User
+from app.dependencies import get_db
+from app.schemas.tasks import TaskCreateData, TaskUpdateData
+from app.services.category_service import CategoryService
+from app.services.task_service import TaskService
+from app.services.user_service import UserService
 
 templates = Jinja2Templates(directory="templates")
 
@@ -33,9 +39,12 @@ async def register_form_submit(
     name: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
+    db: Session = Depends(get_db)
 ):
     try:
-        fn.create_user(name=name, email=email, password=password)
+        UserService.create_user(
+            db, name, email, password
+        )
 
         return RedirectResponse(url="/login", status_code=HTTP_302_FOUND)
 
@@ -103,10 +112,12 @@ async def get_user_account(
 
 @router.post("/dashboard", response_class=HTMLResponse)
 async def post_del_user(
-    request: Request, current_user: User = Depends(get_current_user_from_cookie)
+    request: Request,
+    current_user: User = Depends(get_current_user_from_cookie),
+    db: Session = Depends(get_db)
 ):
     try:
-        fn.delete_user(user_id=current_user.id)
+        UserService.delete_user(db, current_user.id)
         response = RedirectResponse(
             url="/delete-account-success", status_code=HTTP_302_FOUND
         )
@@ -130,8 +141,10 @@ async def delete_account(request: Request):
 async def get_create_task(
     request: Request,
     current_user: User = Depends(get_current_user_from_cookie),
-    categories=fn.get_all_categories(),
+    categories=None,
 ):
+    if categories is None:
+        categories = CategoryService.get_all_categories(get_db())
     return templates.TemplateResponse(
         "create-task.html", {"request": request, "categories": categories}
     )
@@ -140,26 +153,16 @@ async def get_create_task(
 @router.post("/create-task", response_class=HTMLResponse)
 async def post_create_task(
     request: Request,
-    title: str = Form(...),
-    description: str = Form(None),
-    deadline: str = Form(None),
-    status: str = Form(...),
-    priority: str = Form(...),
-    categories: list[str] = Form(None),
+    task_data: TaskCreateData,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user_from_cookie),
 ):
     try:
-        if deadline:
-            deadline = deadline.replace("T", " ")
+        if task_data.deadline:
+            task_data.deadline = task_data.deadline.replace("T", " ")
 
-        fn.create_task(
-            user_id=current_user.id,
-            title=title,
-            description=description,
-            deadline=deadline,
-            categories=categories,
-            status=status,
-            priority=priority,
+        TaskService.create_task(
+            db=db, user_id=current_user.id, task_data=task_data
         )
 
         return RedirectResponse(
@@ -167,7 +170,7 @@ async def post_create_task(
         )
 
     except ValueError as e:
-        categories_list = fn.get_all_categories()
+        categories_list = CategoryService.get_all_categories(db)
         return templates.TemplateResponse(
             "create-task.html",
             {"request": request, "categories": categories_list, "error": str(e)},
@@ -185,9 +188,11 @@ async def get_success(
 
 @router.get("/tasks", response_class=HTMLResponse)
 async def get_all_tasks_user(
-    request: Request, current_user: User = Depends(get_current_user_from_cookie)
+    request: Request,
+    current_user: User = Depends(get_current_user_from_cookie),
+    db: Session = Depends(get_db)
 ):
-    tasks = fn.get_all_user_tasks(user_id=current_user.id)
+    tasks = TaskService.get_all_user_tasks(db, current_user.id)
     return templates.TemplateResponse(
         "tasks.html",
         {"request": request, "tasks": tasks, "user_name": current_user.name},
@@ -199,10 +204,11 @@ async def delete_task(
     request: Request,
     task_id: int,
     current_user: User = Depends(get_current_user_from_cookie),
+    db: Session = Depends(get_db)
 ):
     try:
-        fn.delete_task(user_id=current_user.id, task_id=task_id)
-        tasks = fn.get_all_user_tasks(user_id=current_user.id)
+        TaskService.delete_task(db, current_user.id, task_id)
+        tasks = TaskService.get_all_user_tasks(db=db, user_id=current_user.id)
         return templates.TemplateResponse(
             "tasks.html",
             {
@@ -213,7 +219,7 @@ async def delete_task(
             },
         )
     except ValueError as e:
-        tasks = fn.get_all_user_tasks(user_id=current_user.id)
+        tasks = TaskService.get_all_user_tasks(db=db, user_id=current_user.id)
         return templates.TemplateResponse(
             "tasks.html",
             {
@@ -230,9 +236,12 @@ async def get_task_by_id(
     request: Request,
     task_id: int,
     current_user: User = Depends(get_current_user_from_cookie),
-    categories=fn.get_all_categories(),
+    db: Session = Depends(get_db),
+    categories=None,
 ):
-    task_by_id = fn.get_user_task_by_id(user_id=current_user.id, task_id=task_id)
+    if categories is None:
+        categories = CategoryService.get_all_categories(db)
+    task_by_id = TaskService.get_user_task_by_id(db=db, user_id=current_user.id, task_id=task_id)
     return templates.TemplateResponse(
         "edit-task.html",
         {
@@ -249,30 +258,17 @@ async def get_task_by_id(
 async def post_edit_task(
     request: Request,
     task_id: int,
-    title: str = Form(...),
-    description: str = Form(None),
-    deadline: str = Form(None),
-    status: str = Form(...),
-    priority: str = Form(...),
-    categories: list[str] = Form(None),
+    update_data = TaskUpdateData,
     current_user: User = Depends(get_current_user_from_cookie),
+        db: Session = Depends(get_db)
 ):
     try:
-        if deadline:
-            deadline = deadline.replace("T", " ")
+        if update_data.deadline:
+            update_data.deadline = update_data.deadline.replace("T", " ")
 
-        updated_task = fn.update_task_full(
-            user_id=current_user.id,
-            task_id=task_id,
-            title=title,
-            status=status,
-            priority=priority,
-            deadline=deadline,
-            description=description,
-            categories=categories,
-        )
+        updated_task = TaskService.update_task_full(db=db, user_id=current_user.id, task_id=task_id, update_data=update_data)
 
-        all_categories = fn.get_all_categories()
+        all_categories = CategoryService.get_all_categories(db)
         return templates.TemplateResponse(
             "edit-task.html",
             {
@@ -286,8 +282,8 @@ async def post_edit_task(
         )
 
     except ValueError as e:
-        all_categories = fn.get_all_categories()
-        task = fn.get_user_task_by_id(user_id=current_user.id, task_id=task_id)
+        all_categories = CategoryService.get_all_categories(db)
+        task = TaskService.get_user_task_by_id(db=db, user_id=current_user.id, task_id=task_id)
         return templates.TemplateResponse(
             "edit-task.html",
             {
@@ -307,8 +303,9 @@ async def get_edit_categories(
     current_user: User = Depends(get_current_user_from_cookie),
     error: Optional[str] = None,
     success: Optional[str] = None,
+    db: Session = Depends(get_db)
 ):
-    all_categories = fn.get_all_categories()
+    all_categories = CategoryService.get_all_categories(db)
     return templates.TemplateResponse(
         "edit-categories.html",
         {
@@ -326,11 +323,12 @@ async def post_add_category(
     request: Request,
     title: str = Form(...),
     current_user: User = Depends(get_current_user_from_cookie),
+    db: Session = Depends(get_db)
 ):
     try:
         if not current_user.is_admin:
             raise ValueError("Доступ запрещен")
-        fn.create_category(title=title)
+        CategoryService.create_category(db=db, title=title)
 
         return RedirectResponse("/edit-categories?success=True", status_code=302)
     except ValueError as e:
@@ -342,11 +340,12 @@ async def post_del_category(
     request: Request,
     categories: list[int] = Form(...),
     current_user: User = Depends(get_current_user_from_cookie),
+    db: Session = Depends(get_db)
 ):
     try:
         if not current_user.is_admin:
             raise ValueError("Доступ запрещен")
-        fn.delete_categories_list(categories)
+        CategoryService.delete_categories_list(db, categories)
         return RedirectResponse("/edit-categories?success=True", status_code=302)
     except ValueError as e:
         return RedirectResponse(f"/edit-categories?error={str(e)}", status_code=400)

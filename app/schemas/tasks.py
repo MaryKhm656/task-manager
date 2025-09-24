@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 
 
 @dataclass
 class TaskCreateData:
     title: str
     description: Optional[str] = None
-    deadline: Optional[datetime] = None
+    deadline: Union[datetime, str] = None
     categories: Optional[List[str]] = None
     status: str = "не выполнена"
     priority: str = "средний"
@@ -17,7 +17,7 @@ class TaskCreateData:
 class TaskUpdateData:
     title: Optional[str] = None
     description: Optional[str] = None
-    deadline: Optional[datetime] = None
+    deadline: Union[datetime, str] = None
     categories: Optional[List[int]] = None
     status: Optional[str] = None
     priority: Optional[str] = None
