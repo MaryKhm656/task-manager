@@ -349,3 +349,4 @@ async def post_del_category(
         return RedirectResponse("/edit-categories?success=True", status_code=302)
     except ValueError as e:
         return RedirectResponse(f"/edit-categories?error={str(e)}", status_code=400)
+
