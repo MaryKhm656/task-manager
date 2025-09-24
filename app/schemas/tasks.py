@@ -1,5 +1,6 @@
+import datetime
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 
 NOT_PROVIDED = object()
 
@@ -8,7 +9,7 @@ NOT_PROVIDED = object()
 class TaskCreateData:
     title: str
     description: Optional[str] = None
-    deadline: Optional[str] = None
+    deadline: Union[datetime, str] = None
     categories: Optional[List[int]] = None
     status: str = "не выполнена"
     priority: str = "средний"

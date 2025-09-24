@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import List, Union
+from typing import List, Optional, Union
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
@@ -16,7 +16,7 @@ from app.schemas.tasks import (
 
 class TaskService:
     @staticmethod
-    def _validate_deadline(deadline: Union[datetime, str]) -> None:
+    def _validate_deadline(deadline: Union[datetime, str]) -> Optional[datetime]:
         if isinstance(deadline, str):
             if not deadline.strip():
                 deadline = None
@@ -29,6 +29,7 @@ class TaskService:
                     )
         if deadline and deadline < datetime.now():
             raise ValueError("Нельзя установить дедлайн в прошлом")
+        return deadline
 
     @staticmethod
     def _validate_status_priority(status: str, priority: str) -> None:
@@ -43,7 +44,7 @@ class TaskService:
         if not task_data.title.strip():
             raise ValueError("Название задачи не может быть пустым")
 
-        TaskService._validate_deadline(task_data.deadline)
+        task_data.deadline = TaskService._validate_deadline(task_data.deadline)
         TaskService._validate_status_priority(task_data.status, task_data.priority)
 
         user = db.get(User, user_id)
@@ -105,7 +106,7 @@ class TaskService:
             task.description = update_data.description
 
         if update_data.deadline is not None:
-            TaskService._validate_deadline(update_data.deadline)
+            update_data.deadline = TaskService._validate_deadline(update_data.deadline)
             task.deadline = update_data.deadline
 
         if update_data.status is not None:

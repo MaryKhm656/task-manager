@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}FlapTask{% endblock %}</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -11,15 +11,34 @@
     <nav>
         <ul class="navbar">
             <li><a href="/">Главная</a></li>
-            <li><a href="/tasks">Задачи</a></li>
-            <li><a href="/dashboard">Личный кабинет</a></li>
+
+            {% if current_user %}
+                <li><a href="/tasks">Мои задачи</a></li>
+                <li><a href="/create-task">Создать задачу</a></li>
+                <li><a href="/dashboard">Личный кабинет ({{ current_user.name }})</a></li>
+                <li><a href="/logout">Выйти</a></li>
+            {% else %}
+                <li><a href="/login">Войти</a></li>
+                <li><a href="/register">Регистрация</a></li>
+            {% endif %}
         </ul>
     </nav>
 </header>
 
 <main>
+    {% if message %}
+    <div class="alert alert-info">
+        {{ message }}
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-error">
+        {{ error }}
+    </div>
+    {% endif %}
+
     {% block content %}
-    
     {% endblock %}
 </main>
 </body>
