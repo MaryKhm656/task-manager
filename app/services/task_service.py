@@ -1,18 +1,33 @@
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List, Union
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
 from app.crud.constants import ALLOWED_PRIORITIES, ALLOWED_STATUSES
 from app.db.models import Category, Task, User
-from app.schemas.tasks import TaskCreateData, TaskFilterData, TaskUpdateData
+from app.schemas.tasks import (
+    NOT_PROVIDED,
+    TaskCreateData,
+    TaskFilterData,
+    TaskUpdateData,
+)
 
 
 class TaskService:
     @staticmethod
-    def _validate_deadline(deadline: Optional[datetime]) -> None:
-        if deadline and deadline < datetime.now(timezone.utc):
+    def _validate_deadline(deadline: Union[datetime, str]) -> None:
+        if isinstance(deadline, str):
+            if not deadline.strip():
+                deadline = None
+            else:
+                try:
+                    deadline = datetime.strptime(deadline, "%Y-%m-%d %H:%M")
+                except ValueError:
+                    raise ValueError(
+                        "Неверный формат даты. Ожидается формат: 'YYYY-MM-DD HH:MM'"
+                    )
+        if deadline and deadline < datetime.now():
             raise ValueError("Нельзя установить дедлайн в прошлом")
 
     @staticmethod
@@ -35,7 +50,6 @@ class TaskService:
         if not user:
             raise ValueError("Пользователь не найден")
 
-        # Проверяем уникальность задачи у пользователя
         existing = (
             db.query(Task)
             .filter_by(user_id=user_id, title=task_data.title.strip())
@@ -82,7 +96,6 @@ class TaskService:
         if not task:
             raise ValueError("Задача не найдена")
 
-        # Обновляем поля если они переданы
         if update_data.title is not None:
             if not update_data.title.strip():
                 raise ValueError("Название задачи не может быть пустым")
@@ -107,14 +120,19 @@ class TaskService:
                 raise ValueError("Недопустимый приоритет")
             task.priority = clean_priority
 
-        if update_data.categories is not None:
-            new_ids = set(map(int, update_data.categories))
-            current_ids = set(c.id for c in task.categories)
-            if new_ids != current_ids:
-                found_cats = db.query(Category).filter(Category.id.in_(new_ids)).all()
-                if len(found_cats) != len(new_ids):
-                    raise ValueError("Одна или несколько категорий не найдены")
-                task.categories = found_cats
+        if update_data.categories is not NOT_PROVIDED:
+            if update_data.categories is None:
+                task.categories = []
+            else:
+                new_ids = set(map(int, update_data.categories))
+                current_ids = set(c.id for c in task.categories)
+                if new_ids != current_ids:
+                    found_cats = (
+                        db.query(Category).filter(Category.id.in_(new_ids)).all()
+                    )
+                    if len(found_cats) != len(new_ids):
+                        raise ValueError("Одна или несколько категорий не найдены")
+                    task.categories = found_cats
 
         db.commit()
         db.refresh(task)

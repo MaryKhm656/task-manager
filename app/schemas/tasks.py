@@ -1,26 +1,27 @@
 from dataclasses import dataclass
-from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional
+
+NOT_PROVIDED = object()
 
 
 @dataclass
 class TaskCreateData:
     title: str
     description: Optional[str] = None
-    deadline: Union[datetime, str] = None
-    categories: Optional[List[str]] = None
+    deadline: Optional[str] = None
+    categories: Optional[List[int]] = None
     status: str = "не выполнена"
     priority: str = "средний"
 
 
 @dataclass
 class TaskUpdateData:
-    title: Optional[str] = None
-    description: Optional[str] = None
-    deadline: Union[datetime, str] = None
-    categories: Optional[List[int]] = None
-    status: Optional[str] = None
-    priority: Optional[str] = None
+    title: Optional[str] = NOT_PROVIDED
+    description: Optional[str] = NOT_PROVIDED
+    deadline: Optional[str] = NOT_PROVIDED
+    categories: Optional[List[int]] = NOT_PROVIDED  # ← Используем sentinel
+    status: Optional[str] = NOT_PROVIDED
+    priority: Optional[str] = NOT_PROVIDED
 
 
 @dataclass

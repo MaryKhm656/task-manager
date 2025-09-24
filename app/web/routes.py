@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -8,7 +8,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_302_FOUND
 
-from app.crud import functions as fn
 from app.crud.auth import get_current_user_from_cookie, login_user
 from app.crud.constants import ALLOWED_PRIORITIES, ALLOWED_STATUSES
 from app.db.models import User
@@ -39,12 +38,10 @@ async def register_form_submit(
     name: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     try:
-        UserService.create_user(
-            db, name, email, password
-        )
+        UserService.create_user(db, name, email, password)
 
         return RedirectResponse(url="/login", status_code=HTTP_302_FOUND)
 
@@ -114,7 +111,7 @@ async def get_user_account(
 async def post_del_user(
     request: Request,
     current_user: User = Depends(get_current_user_from_cookie),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     try:
         UserService.delete_user(db, current_user.id)
@@ -142,9 +139,10 @@ async def get_create_task(
     request: Request,
     current_user: User = Depends(get_current_user_from_cookie),
     categories=None,
+    db: Session = Depends(get_db),
 ):
     if categories is None:
-        categories = CategoryService.get_all_categories(get_db())
+        categories = CategoryService.get_all_categories(db)
     return templates.TemplateResponse(
         "create-task.html", {"request": request, "categories": categories}
     )
@@ -153,17 +151,29 @@ async def get_create_task(
 @router.post("/create-task", response_class=HTMLResponse)
 async def post_create_task(
     request: Request,
-    task_data: TaskCreateData,
+    title: str = Form(...),
+    description: Optional[str] = Form(None),
+    deadline: Optional[str] = Form(None),
+    categories: Optional[List[int]] = Form(None),
+    status: str = Form("не выполнена"),
+    priority: str = Form("средний"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user_from_cookie),
 ):
     try:
+        task_data = TaskCreateData(
+            title=title,
+            description=description,
+            deadline=deadline,
+            categories=categories,
+            status=status,
+            priority=priority,
+        )
+
         if task_data.deadline:
             task_data.deadline = task_data.deadline.replace("T", " ")
 
-        TaskService.create_task(
-            db=db, user_id=current_user.id, task_data=task_data
-        )
+        TaskService.create_task(db=db, user_id=current_user.id, task_data=task_data)
 
         return RedirectResponse(
             url="/task-creation-success", status_code=HTTP_302_FOUND
@@ -190,7 +200,7 @@ async def get_success(
 async def get_all_tasks_user(
     request: Request,
     current_user: User = Depends(get_current_user_from_cookie),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     tasks = TaskService.get_all_user_tasks(db, current_user.id)
     return templates.TemplateResponse(
@@ -204,7 +214,7 @@ async def delete_task(
     request: Request,
     task_id: int,
     current_user: User = Depends(get_current_user_from_cookie),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     try:
         TaskService.delete_task(db, current_user.id, task_id)
@@ -241,7 +251,9 @@ async def get_task_by_id(
 ):
     if categories is None:
         categories = CategoryService.get_all_categories(db)
-    task_by_id = TaskService.get_user_task_by_id(db=db, user_id=current_user.id, task_id=task_id)
+    task_by_id = TaskService.get_user_task_by_id(
+        db=db, user_id=current_user.id, task_id=task_id
+    )
     return templates.TemplateResponse(
         "edit-task.html",
         {
@@ -258,15 +270,31 @@ async def get_task_by_id(
 async def post_edit_task(
     request: Request,
     task_id: int,
-    update_data = TaskUpdateData,
+    title: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    deadline: Optional[str] = Form(None),
+    categories: Optional[List[int]] = Form(None),
+    status: str = Form(None),
+    priority: str = Form(None),
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user_from_cookie),
-        db: Session = Depends(get_db)
 ):
     try:
+        update_data = TaskUpdateData(
+            title=title,
+            description=description,
+            deadline=deadline,
+            categories=categories,
+            status=status,
+            priority=priority,
+        )
+
         if update_data.deadline:
             update_data.deadline = update_data.deadline.replace("T", " ")
 
-        updated_task = TaskService.update_task_full(db=db, user_id=current_user.id, task_id=task_id, update_data=update_data)
+        updated_task = TaskService.update_task_full(
+            db=db, user_id=current_user.id, task_id=task_id, update_data=update_data
+        )
 
         all_categories = CategoryService.get_all_categories(db)
         return templates.TemplateResponse(
@@ -283,7 +311,9 @@ async def post_edit_task(
 
     except ValueError as e:
         all_categories = CategoryService.get_all_categories(db)
-        task = TaskService.get_user_task_by_id(db=db, user_id=current_user.id, task_id=task_id)
+        task = TaskService.get_user_task_by_id(
+            db=db, user_id=current_user.id, task_id=task_id
+        )
         return templates.TemplateResponse(
             "edit-task.html",
             {
@@ -303,7 +333,7 @@ async def get_edit_categories(
     current_user: User = Depends(get_current_user_from_cookie),
     error: Optional[str] = None,
     success: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     all_categories = CategoryService.get_all_categories(db)
     return templates.TemplateResponse(
@@ -323,7 +353,7 @@ async def post_add_category(
     request: Request,
     title: str = Form(...),
     current_user: User = Depends(get_current_user_from_cookie),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     try:
         if not current_user.is_admin:
@@ -340,7 +370,7 @@ async def post_del_category(
     request: Request,
     categories: list[int] = Form(...),
     current_user: User = Depends(get_current_user_from_cookie),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     try:
         if not current_user.is_admin:
@@ -349,4 +379,3 @@ async def post_del_category(
         return RedirectResponse("/edit-categories?success=True", status_code=302)
     except ValueError as e:
         return RedirectResponse(f"/edit-categories?error={str(e)}", status_code=400)
-
