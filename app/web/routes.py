@@ -11,7 +11,7 @@ from starlette.status import HTTP_302_FOUND
 from app.crud.auth import get_current_user_from_cookie, login_user
 from app.crud.constants import ALLOWED_PRIORITIES, ALLOWED_STATUSES
 from app.db.models import User
-from app.dependencies import get_db
+from app.dependencies import get_db, get_template_user
 from app.schemas.tasks import TaskCreateData, TaskUpdateData
 from app.services.category_service import CategoryService
 from app.services.task_service import TaskService
@@ -23,13 +23,25 @@ router = APIRouter()
 
 
 @router.get("/", response_class=HTMLResponse)
-async def reed_root(request: Request):
-    return templates.TemplateResponse("home.html", {"request": request})
+async def reed_root(request: Request, current_user=Depends(get_template_user)):
+    return templates.TemplateResponse(
+        "home.html",
+        {"request": request, "current_user": current_user},
+    )
 
 
 @router.get("/register", response_class=HTMLResponse)
-async def register_form(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
+async def register_form(
+    request: Request,
+    message: str = None,
+    current_user: User = Depends(get_template_user),
+):
+    if current_user:
+        return RedirectResponse(url="/")
+    return templates.TemplateResponse(
+        "register.html",
+        {"request": request, "current_user": current_user, "message": message},
+    )
 
 
 @router.post("/register", response_class=HTMLResponse)
@@ -67,8 +79,16 @@ async def register_form_submit(
 
 
 @router.get("/login", response_class=HTMLResponse)
-async def login_form(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+async def login_form(request: Request, current_user: User = Depends(get_template_user)):
+    if current_user:
+        return RedirectResponse(url="/")
+    return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request,
+            "current_user": current_user,
+        },
+    )
 
 
 @router.post("/login", response_class=HTMLResponse)
@@ -101,6 +121,7 @@ async def get_user_account(
         "dashboard.html",
         {
             "request": request,
+            "current_user": current_user,
             "user_name": current_user.name,
             "is_admin": current_user.is_admin,
         },
@@ -123,14 +144,29 @@ async def post_del_user(
     except ValueError as e:
         return templates.TemplateResponse(
             "dashboard.html",
-            {"request": request, "user_name": current_user.name, "error": str(e)},
+            {
+                "request": request,
+                "user_name": current_user.name,
+                "error": str(e),
+                "current_user": current_user,
+            },
         )
 
 
+@router.get("/logout")
+async def logout_user():
+    response = RedirectResponse(url="/", status_code=302)
+    response.delete_cookie("access_token")
+    return response
+
+
 @router.get("/delete-account-success", response_class=HTMLResponse)
-async def delete_account(request: Request):
+async def delete_account(
+    request: Request, current_user: User = Depends(get_template_user)
+):
     return templates.TemplateResponse(
-        "delete-account-success.html", {"request": request}
+        "delete-account-success.html",
+        {"request": request, "current_user": current_user},
     )
 
 
@@ -144,7 +180,8 @@ async def get_create_task(
     if categories is None:
         categories = CategoryService.get_all_categories(db)
     return templates.TemplateResponse(
-        "create-task.html", {"request": request, "categories": categories}
+        "create-task.html",
+        {"request": request, "categories": categories, "current_user": current_user},
     )
 
 
@@ -183,7 +220,12 @@ async def post_create_task(
         categories_list = CategoryService.get_all_categories(db)
         return templates.TemplateResponse(
             "create-task.html",
-            {"request": request, "categories": categories_list, "error": str(e)},
+            {
+                "request": request,
+                "categories": categories_list,
+                "error": str(e),
+                "current_user": current_user,
+            },
         )
 
 
@@ -192,7 +234,7 @@ async def get_success(
     request: Request, current_user: User = Depends(get_current_user_from_cookie)
 ):
     return templates.TemplateResponse(
-        "task-creation-success.html", {"request": request}
+        "task-creation-success.html", {"request": request, "current_user": current_user}
     )
 
 
@@ -205,7 +247,12 @@ async def get_all_tasks_user(
     tasks = TaskService.get_all_user_tasks(db, current_user.id)
     return templates.TemplateResponse(
         "tasks.html",
-        {"request": request, "tasks": tasks, "user_name": current_user.name},
+        {
+            "request": request,
+            "tasks": tasks,
+            "user_name": current_user.name,
+            "current_user": current_user,
+        },
     )
 
 
@@ -226,6 +273,7 @@ async def delete_task(
                 "tasks": tasks,
                 "user_name": current_user.name,
                 "success": True,
+                "current_user": current_user,
             },
         )
     except ValueError as e:
@@ -237,6 +285,7 @@ async def delete_task(
                 "tasks": tasks,
                 "user_name": current_user.name,
                 "error": str(e),
+                "current_user": current_user,
             },
         )
 
@@ -262,6 +311,7 @@ async def get_task_by_id(
             "categories": categories,
             "allowed_statuses": ALLOWED_STATUSES,
             "allowed_priorities": ALLOWED_PRIORITIES,
+            "current_user": current_user,
         },
     )
 
@@ -306,6 +356,7 @@ async def post_edit_task(
                 "allowed_statuses": ALLOWED_STATUSES,
                 "allowed_priorities": ALLOWED_PRIORITIES,
                 "success": True,
+                "current_user": current_user,
             },
         )
 
@@ -323,6 +374,7 @@ async def post_edit_task(
                 "allowed_statuses": ALLOWED_STATUSES,
                 "allowed_priorities": ALLOWED_PRIORITIES,
                 "error": str(e),
+                "current_user": current_user,
             },
         )
 
@@ -344,6 +396,7 @@ async def get_edit_categories(
             "is_admin": current_user.is_admin,
             "error": error,
             "success": success == "True",
+            "current_user": current_user,
         },
     )
 
