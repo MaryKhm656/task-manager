@@ -16,7 +16,7 @@
                 <li><a href="/tasks">Мои задачи</a></li>
                 <li><a href="/create-task">Создать задачу</a></li>
                 <li><a href="/dashboard">Личный кабинет ({{ current_user.name }})</a></li>
-                <li><a href="/logout">Выйти</a></li>
+                <li><a href="/logout" onclick="return confirm('Вы уверены, что хотите выйти?');">Выйти</a></li>
             {% else %}
                 <li><a href="/login">Войти</a></li>
                 <li><a href="/register">Регистрация</a></li>
@@ -26,18 +26,6 @@
 </header>
 
 <main>
-    {% if message %}
-    <div class="alert alert-info">
-        {{ message }}
-    </div>
-    {% endif %}
-
-    {% if error %}
-    <div class="alert alert-error">
-        {{ error }}
-    </div>
-    {% endif %}
-
     {% block content %}
     {% endblock %}
 </main>
