@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <title>{% block title %}FlapTask{% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css">
+
+    {% if request.app.state.is_gui %}
+    <link rel="stylesheet" href="/static/gui_style.css">
+    {% endif %}
     <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates&display=swap" rel="stylesheet">
 </head>
 <body>
