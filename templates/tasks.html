@@ -21,7 +21,7 @@
     <form action="/edit-task/{{ task.id }}">
       <button type="submit">Редактировать</button>
     </form>
-    <form action="/tasks/{{ task.id }}" method="post">
+    <form action="/tasks/{{ task.id }}" method="post" onsubmit="return confirm('Удалить задачу?')">
       <button type="submit" class="del-task-but">Удалить задачу</button>
     </form>
   </div>
