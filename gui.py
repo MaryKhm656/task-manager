@@ -1,8 +1,5 @@
-import os
 import threading
 import time
-
-os.environ["GUI_MODE"] = "true"
 
 import uvicorn
 import webview
@@ -14,7 +11,8 @@ from app.web.main import create_app
 
 
 def run_server():
-    app = create_app()
+    """Запуск FastAPI сервера"""
+    app = create_app(is_gui=True)
     uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
 
 
