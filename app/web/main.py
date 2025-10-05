@@ -21,6 +21,9 @@ def create_app(is_gui: bool = False) -> FastAPI:
             is_gui_flag = True
 
         request.state.is_gui = is_gui_flag
+
+        print("Middleware: ", request.url.path, "GUI?", is_gui_flag)
+
         response = await call_next(request)
         return response
 
