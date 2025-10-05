@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.web import routes
@@ -12,34 +11,27 @@ def create_app(is_gui: bool = False) -> FastAPI:
 
     @app.middleware("http")
     async def detect_gui(request: Request, call_next):
-        is_gui_flag = False
-        if request.headers.get("X-App-Client") == "GUI":
-            is_gui_flag = True
-        elif request.cookies.get("is_gui") == "1":
-            is_gui_flag = True
-        elif request.query_params.get("gui") == "1":
-            is_gui_flag = True
-
-        request.state.is_gui = is_gui_flag
-
-        print("Middleware: ", request.url.path, "GUI?", is_gui_flag)
+        if request.headers.get("X-Api-Client") == "GUI":
+            request.state.is_gui = True
+        else:
+            request.state.is_gui = False
 
         response = await call_next(request)
         return response
 
-    @app.get("/gui-launch")
-    async def gui_launch(request: Request):
-        resp = RedirectResponse(url="/")
-        secure_flag = request.url.scheme == "https"
-        resp.set_cookie(
-            key="is_gui",
-            value="1",
-            max_age=60 * 60 * 24 * 30,
-            httponly=True,
-            samesite="lax",
-            secure=secure_flag,
-        )
-        return resp
+    # @app.get("/gui-launch")
+    # async def gui_launch(request: Request):
+    #     resp = RedirectResponse(url="/")
+    #     secure_flag = request.url.scheme == "https"
+    #     resp.set_cookie(
+    #         key="is_gui",
+    #         value="1",
+    #         max_age=60 * 60 * 24 * 30,
+    #         httponly=True,
+    #         samesite="lax",
+    #         secure=secure_flag,
+    #     )
+    #     return resp
 
     app.include_router(routes.router)
     return app
