@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from starlette.responses import RedirectResponse
 
 from app.web import routes
 
@@ -12,10 +12,15 @@ def create_app(is_gui: bool = False) -> FastAPI:
 
     @app.middleware("http")
     async def detect_gui(request: Request, call_next):
-        if request.cookies.get("is_gui") == "1":
-            request.state.is_gui = True
-        else:
-            request.state.is_gui = False
+        is_gui_flag = False
+        if request.headers.get("X-App-Client") == "GUI":
+            is_gui_flag = True
+        elif request.cookies.get("is_gui") == "1":
+            is_gui_flag = True
+        elif request.query_params.get("gui") == "1":
+            is_gui_flag = True
+
+        request.state.is_gui = is_gui_flag
 
         response = await call_next(request)
         return response
