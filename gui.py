@@ -9,7 +9,7 @@ SERVER_URL = "http://194.39.101.101:8000"
 if __name__ == "__main__":
     window = webview.create_window(
         "Планировщик задач",
-        f"{SERVER_URL}/",
+        f"{SERVER_URL}/gui-launch",
         width=1500,
         height=900,
         min_size=(800, 600),
