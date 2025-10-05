@@ -12,7 +12,7 @@ def create_app(is_gui: bool = False) -> FastAPI:
 
     @app.middleware("http")
     async def detect_gui(request: Request, call_next):
-        if request.headers.get("X-App-Client") == "GUI":
+        if request.cookies.get("is_gui") == "1":
             request.state.is_gui = True
         else:
             request.state.is_gui = False

@@ -25,20 +25,8 @@
                 <li><a href="/login">Войти</a></li>
                 <li><a href="/register">Регистрация</a></li>
             {% endif %}
-            {% if request.state.is_gui %}
-                <div style="color:black;">
-                    GUI MODE
-                </div>
-            {% else %}
-                <div style="color:black;">
-                    WEB MODE
-                </div>
-            {% endif %}
         </ul>
     </nav>
-    <div style="color:red;">
-        {{ request.headers.get("X-App-Client") }}
-    </div>
 </header>
 
 <main>
