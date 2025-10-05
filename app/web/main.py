@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
+from starlette.responses import RedirectResponse
 
 from app.web import routes
 
@@ -19,19 +20,19 @@ def create_app(is_gui: bool = False) -> FastAPI:
         response = await call_next(request)
         return response
 
-    # @app.get("/gui-launch")
-    # async def gui_launch(request: Request):
-    #     resp = RedirectResponse(url="/")
-    #     secure_flag = request.url.scheme == "https"
-    #     resp.set_cookie(
-    #         key="is_gui",
-    #         value="1",
-    #         max_age=60 * 60 * 24 * 30,
-    #         httponly=True,
-    #         samesite="lax",
-    #         secure=secure_flag,
-    #     )
-    #     return resp
+    @app.get("/gui-launch")
+    async def gui_launch(request: Request):
+        resp = RedirectResponse(url="/")
+        secure_flag = request.url.scheme == "https"
+        resp.set_cookie(
+            key="is_gui",
+            value="1",
+            max_age=60 * 60 * 24 * 30,
+            httponly=True,
+            samesite="lax",
+            secure=secure_flag,
+        )
+        return resp
 
     app.include_router(routes.router)
     return app
