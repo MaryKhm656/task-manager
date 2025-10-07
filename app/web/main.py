@@ -25,14 +25,13 @@ def create_app(is_gui: bool = False) -> FastAPI:
         response = await call_next(request)
 
         if is_gui_flag and not request.cookies.get("is_gui"):
-            secure_flag = request.url.scheme == "https"
             response.set_cookie(
                 key="is_gui",
                 value="1",
                 max_age=60 * 60 * 24 * 30,
                 httponly=True,
                 samesite="lax",
-                secure=secure_flag,
+                secure=False,
             )
 
         return response
@@ -40,14 +39,13 @@ def create_app(is_gui: bool = False) -> FastAPI:
     @app.get("/gui-launch")
     async def gui_launch(request: Request):
         resp = RedirectResponse(url="/")
-        secure_flag = request.url.scheme == "https"
         resp.set_cookie(
             key="is_gui",
             value="1",
             max_age=60 * 60 * 24 * 30,
             httponly=True,
             samesite="lax",
-            secure=secure_flag,
+            secure=False,
         )
         return resp
 
