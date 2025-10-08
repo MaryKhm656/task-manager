@@ -2,7 +2,9 @@
 
 **'FlapTask'** - это удобное и минималистичное веб-приложение на FastAPI, позволяющее пользователям эффективно управлять своими задачами: создавать, просматривать, редактировать и удалять. Все действия защищены авторизацией через токены и cookie.
 
-Если нужно REST API приложение, полностью покрытое тестами - [См. этот проект](https://github.com/MaryKhm656/bank_account_app)
+Веб-приложение доступно по [ссылке](http://194.39.101.101:8000/)
+
+Десктопное приложение можно скачать из директории dist -> *FlapTask.exe*
 
 ## Возможности
 
@@ -37,53 +39,30 @@
 - **Хэширование паролей:** `passlib`
 - **Работа с куки:** авторизация через cookie (без OAuth)
 
-## Структура проекта
-```bash
-task-manager/                 
-├── alembic/                         
-├── app/
-│   ├── web/
-│   │   ├── __init__.py
-│   │   ├── routes.py
-│   ├── crud/
-│   │   ├── __init__.py
-│   │   ├── auth.py
-│   │   ├── constants.py
-│   │   ├── functions.py
-│   │   └── security.py
-│   ├── db/
-│   │   ├── __init__.py
-│   │   ├── database.py
-│   │   └── models.py
-│   └── __init__.py
-├── static/
-│   ├── image/
-│   └── style.css
-├── templates/
-│   └── base.html
-│   └── create-task.html
-│   └── dashboard.html
-│   └── delete-account-success.html
-│   └── edit-categories.html
-│   └── edit-task.html
-│   └── home.html
-│   └── login.html
-│   └── register.html
-│   └── task-creation-success.html
-│   └── tasks.html
-├── main.py
-├── .gitignore
-├── README.md
-└── requirenments.txt
+# Локальный запуск проекта
+
+- Клонируйте репозиторий ```git clone https://github.com/MaryKhm656/task-manager```
+- Создайте виртуальное окружение:
+```commandline
+python -m venv venv
 ```
-
-## Запуск проекта
-
-- Клонируйте репозиторий
-- Установите зависимости
-- В терминале вашего IDE запустите приложение: ``` uvicorn main:app --reload ```
-- Откройте в браузере: http://127.0.0.1:8000
-- Жмякайте кнопки
+```
+venv\Scripts\activate
+```
+- Установите зависимости:
+```commandline
+pip install -r requirements.txt
+```
+- Сгенерируйте SECRET_KEY и создайте .env файл:
+```commandline
+python -c "import secrets; print(f'SECRET_KEY={secrets.token_hex(64)}')" > .env
+```
+- После генерации секретного ключа, откройте .env файл и добавьте ваши данные для подключения к базе данных, по примеру из .env.example
+```commandline
+DATABASE_URL=postgresql://<имя пользователя>:<пароль>@<хост>:<порт>/<название базы данных>
+```
+- Запустите файл **init_database.py** для создания таблиц и связей в вашей базе данных
+- После успешной инициализации, запустите файл main.py и перейдите по предложенной ссылке
 
 ## Скриншоты
 

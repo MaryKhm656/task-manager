@@ -1,13 +1,16 @@
-import os
-
+from environs import Env
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+env = Env()
+env.read_env()
 
-engine = create_engine(DATABASE_URL)
+db_url = env("DATABASE_URL")
+
+engine = create_engine(db_url)
 SessionLocal = sessionmaker(bind=engine)
-
 Base = declarative_base()
 
-Base.metadata.create_all(bind=engine)
+
+def init_db():
+    Base.metadata.create_all(bind=engine)
