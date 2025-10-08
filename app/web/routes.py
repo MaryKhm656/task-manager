@@ -24,6 +24,7 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 async def reed_root(request: Request, current_user=Depends(get_template_user)):
+    """The application's home page"""
     return templates.TemplateResponse(
         "home.html",
         {"request": request, "current_user": current_user},
@@ -36,6 +37,12 @@ async def register_form(
     message: str = None,
     current_user: User = Depends(get_template_user),
 ):
+    """
+    New user registration page.
+
+    returns:
+    TemplateResponse: Registration page or redirect if the user is already authenticated
+    """
     if current_user:
         return RedirectResponse(url="/")
     return templates.TemplateResponse(
@@ -52,6 +59,13 @@ async def register_form_submit(
     password: str = Form(...),
     db: Session = Depends(get_db),
 ):
+    """
+    Processing the new user registration form.
+
+    returns:
+    RedirectResponse: Redirect to the login page on success
+    TemplateResponse: Registration page with an error on failure
+    """
     try:
         UserService.create_user(db, name, email, password)
 
@@ -80,6 +94,12 @@ async def register_form_submit(
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_form(request: Request, current_user: User = Depends(get_template_user)):
+    """
+    Login page.
+
+    returns:
+    TemplateResponse: Login page or redirect if the user is already authenticated
+    """
     if current_user:
         return RedirectResponse(url="/")
     return templates.TemplateResponse(
@@ -95,6 +115,13 @@ async def login_form(request: Request, current_user: User = Depends(get_template
 async def login_form_submit(
     request: Request, email: str = Form(...), password: str = Form(...)
 ):
+    """
+    Processing the login form.
+
+    returns:
+    RedirectResponse: Redirect to your account with an access token installed
+    TemplateResponse: Login page with an error message if authentication failed
+    """
     try:
         access_token = login_user(email, password)
 
@@ -117,6 +144,12 @@ async def login_form_submit(
 async def get_user_account(
     request: Request, current_user: User = Depends(get_current_user_from_cookie)
 ):
+    """
+    User's personal account.
+
+    returns:
+    TemplateResponse: Personal account page with user information
+    """
     return templates.TemplateResponse(
         "dashboard.html",
         {
@@ -134,6 +167,13 @@ async def post_del_user(
     current_user: User = Depends(get_current_user_from_cookie),
     db: Session = Depends(get_db),
 ):
+    """
+    Delete user account.
+
+    returns:
+    RedirectResponse: Redirect to deletion confirmation page
+    TemplateResponse: Personal account page with error on failure
+    """
     try:
         UserService.delete_user(db, current_user.id)
         response = RedirectResponse(
@@ -155,6 +195,12 @@ async def post_del_user(
 
 @router.get("/logout")
 async def logout_user():
+    """
+    Logging the user out.
+
+    returns:
+    RedirectResponse: Redirect to the main page with the access token removed
+    """
     response = RedirectResponse(url="/", status_code=302)
     response.delete_cookie("access_token")
     return response
@@ -164,6 +210,12 @@ async def logout_user():
 async def delete_account(
     request: Request, current_user: User = Depends(get_template_user)
 ):
+    """
+    Account deletion confirmation page.
+
+    returns:
+    TemplateResponse: Account deletion confirmation page
+    """
     return templates.TemplateResponse(
         "delete-account-success.html",
         {"request": request, "current_user": current_user},
@@ -177,6 +229,12 @@ async def get_create_task(
     categories=None,
     db: Session = Depends(get_db),
 ):
+    """
+    New task creation page.
+
+    returns:
+    TemplateResponse: Task creation page with a list of categories
+    """
     if categories is None:
         categories = CategoryService.get_all_categories(db)
     return templates.TemplateResponse(
@@ -197,6 +255,13 @@ async def post_create_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user_from_cookie),
 ):
+    """
+    Processing the new task creation form.
+
+    returns:
+    RedirectResponse: Redirect to the successful creation page
+    TemplateResponse: Task creation page with an error on failure
+    """
     try:
         task_data = TaskCreateData(
             title=title,
@@ -233,6 +298,12 @@ async def post_create_task(
 async def get_success(
     request: Request, current_user: User = Depends(get_current_user_from_cookie)
 ):
+    """
+    Confirmation page for successful task creation.
+
+    returns:
+    TemplateResponse: Successful task creation page
+    """
     return templates.TemplateResponse(
         "task-creation-success.html", {"request": request, "current_user": current_user}
     )
@@ -244,6 +315,12 @@ async def get_all_tasks_user(
     current_user: User = Depends(get_current_user_from_cookie),
     db: Session = Depends(get_db),
 ):
+    """
+    A page with a list of all user tasks.
+
+    returns:
+    TemplateResponse: A page with a list of user tasks
+    """
     tasks = TaskService.get_all_user_tasks(db, current_user.id)
     return templates.TemplateResponse(
         "tasks.html",
@@ -263,6 +340,12 @@ async def delete_task(
     current_user: User = Depends(get_current_user_from_cookie),
     db: Session = Depends(get_db),
 ):
+    """
+    Delete a specific user task.
+
+    Returns:
+    TemplateResponse: Task list page with success/error message
+    """
     try:
         TaskService.delete_task(db, current_user.id, task_id)
         tasks = TaskService.get_all_user_tasks(db=db, user_id=current_user.id)
@@ -298,6 +381,12 @@ async def get_task_by_id(
     db: Session = Depends(get_db),
     categories=None,
 ):
+    """
+    Edit page for a specific task.
+
+    Returns:
+    TemplateResponse: Task edit page with pre-populated data
+    """
     if categories is None:
         categories = CategoryService.get_all_categories(db)
     task_by_id = TaskService.get_user_task_by_id(
@@ -329,6 +418,12 @@ async def post_edit_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user_from_cookie),
 ):
+    """
+    Processing the task edit form.
+
+    returns:
+    TemplateResponse: Edit page with updated task and message
+    """
     try:
         update_data = TaskUpdateData(
             title=title,
@@ -387,6 +482,12 @@ async def get_edit_categories(
     success: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
+    """
+    Category management page (available only to administrators).
+
+    returns:
+    TemplateResponse: Category management page
+    """
     all_categories = CategoryService.get_all_categories(db)
     return templates.TemplateResponse(
         "edit-categories.html",
@@ -408,6 +509,12 @@ async def post_add_category(
     current_user: User = Depends(get_current_user_from_cookie),
     db: Session = Depends(get_db),
 ):
+    """
+    Adding a new category (for administrators only).
+
+    returns:
+    RedirectResponse: Redirect to the category management page with the result
+    """
     try:
         if not current_user.is_admin:
             raise ValueError("Доступ запрещен")
@@ -425,6 +532,12 @@ async def post_del_category(
     current_user: User = Depends(get_current_user_from_cookie),
     db: Session = Depends(get_db),
 ):
+    """
+    Deleting categories (for administrators only).
+
+    Returns:
+    RedirectResponse: Redirect to the category management page with the result
+    """
     try:
         if not current_user.is_admin:
             raise ValueError("Доступ запрещен")
