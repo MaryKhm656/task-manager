@@ -17,6 +17,19 @@ from app.schemas.tasks import (
 class TaskService:
     @staticmethod
     def _validate_deadline(deadline: Union[datetime, str]) -> Optional[datetime]:
+        """
+        Validates and converts a task deadline.
+
+        args:
+        deadline: Deadline as a datetime object or a
+        string in the 'YYYY-MM-DD HH:MM' format
+
+        returns:
+        Optional[datetime]: The validated deadline or None if an empty string is passed
+
+        raises:
+        ValueError: If the string format is invalid or the deadline is in the past
+        """
         if isinstance(deadline, str):
             if not deadline.strip():
                 deadline = None
@@ -33,6 +46,7 @@ class TaskService:
 
     @staticmethod
     def _validate_status_priority(status: str, priority: str) -> None:
+        """Checks the validity of the task status and priority"""
         if status.lower().strip() not in ALLOWED_STATUSES:
             raise ValueError("Недопустимый статус задачи")
         if priority.lower().strip() not in ALLOWED_PRIORITIES:
@@ -40,7 +54,21 @@ class TaskService:
 
     @staticmethod
     def create_task(db: Session, user_id: int, task_data: TaskCreateData) -> Task:
-        """Method for creating task for user and validate data"""
+        """
+
+        Creates a new task for a user with data validation.
+
+        args:
+        db: Database session
+        user_id: User ID
+        task_data: Task creation data
+
+        returns:
+        Task: The created task with loaded categories
+
+        raises:
+        ValueError: If the data is invalid or a task with the same name already exists
+        """
         if not task_data.title.strip():
             raise ValueError("Название задачи не может быть пустым")
 
@@ -92,7 +120,21 @@ class TaskService:
     def update_task_full(
         db: Session, user_id: int, task_id: int, update_data: TaskUpdateData
     ) -> Task:
-        """Method for updating task"""
+        """
+        Full task update with validation of all fields.
+
+        args:
+        db: Database session
+        user_id: User ID
+        task_id: Task ID
+        update_data: Data to update
+
+        returns:
+        Task: Updated task with loaded categories
+
+        raises:
+        ValueError: If the task is not found or the data is invalid
+        """
         task = db.query(Task).filter_by(id=task_id, user_id=user_id).first()
         if not task:
             raise ValueError("Задача не найдена")
@@ -146,6 +188,7 @@ class TaskService:
 
     @staticmethod
     def get_all_user_tasks(db: Session, user_id: int) -> List[Task]:
+        """Getting all tasks user"""
         user = db.get(User, user_id)
         if not user:
             raise ValueError("Пользователь с таким ID не найден")
@@ -161,6 +204,7 @@ class TaskService:
     def get_filtered_tasks(
         db: Session, user_id: int, filters: TaskFilterData
     ) -> List[Task]:
+        """Getting user tasks using filters"""
         query = (
             db.query(Task)
             .options(selectinload(Task.categories))

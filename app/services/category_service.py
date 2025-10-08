@@ -1,18 +1,13 @@
-from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List
 
-from sqlalchemy import func
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
-from app.crud.constants import ALLOWED_PRIORITIES, ALLOWED_STATUSES
-from app.db.models import Category, Task, User
-from app.schemas.tasks import TaskCreateData, TaskFilterData, TaskUpdateData
+from app.db.models import Category
 
 
 class CategoryService:
-
     @staticmethod
-    def create_category(db: Session, title:str) -> Category:
+    def create_category(db: Session, title: str) -> Category:
         """Create new category with validate data"""
         clean_title = title.lower().strip()
         if not clean_title:
@@ -35,7 +30,10 @@ class CategoryService:
 
     @staticmethod
     def delete_category(db: Session, category_id: int) -> str:
-        """Deleting category and return success message"""
+        """
+        Deleting category and return success message
+        or raise ValueError if category not found in DB
+        """
         category = db.get(Category, category_id)
         if not category:
             raise ValueError("Категория с таким ID не найдена")
@@ -45,7 +43,7 @@ class CategoryService:
 
     @staticmethod
     def delete_categories_list(db: Session, categories_ids: list[int]) -> str:
-        """Deleting list categories and return success message"""
+        """Deleting list categories and return success message or raise ValueError"""
         for category_id in categories_ids:
             category = db.get(Category, category_id)
             if not category:

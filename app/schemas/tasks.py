@@ -20,7 +20,7 @@ class TaskUpdateData:
     title: Optional[str] = NOT_PROVIDED
     description: Optional[str] = NOT_PROVIDED
     deadline: Optional[str] = NOT_PROVIDED
-    categories: Optional[List[int]] = NOT_PROVIDED  # ← Используем sentinel
+    categories: Optional[List[int]] = NOT_PROVIDED
     status: Optional[str] = NOT_PROVIDED
     priority: Optional[str] = NOT_PROVIDED
 

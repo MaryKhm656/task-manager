@@ -35,7 +35,7 @@ class UserService:
 
     @staticmethod
     def delete_user(db: Session, user_id: int) -> str:
-        """Method for deleting user with validate data"""
+        """Method for deleting user"""
         user = db.get(User, user_id)
         if not user:
             raise ValueError("Пользователь с таким ID не найден")

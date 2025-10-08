@@ -16,7 +16,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
-def create_access_token(data: dict, expires_delta: timedelta = None):
+def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
+    """Creates a JWT access token with the specified data and lifetime"""
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now() + expires_delta
@@ -28,6 +29,18 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    """
+    Gets the current user from the JWT token.
+
+    args:
+    token: JWT token from the Authorization header
+
+    returns:
+    User: User object
+
+    raises:
+    HTTPException: If the token is invalid or the user is not found
+    """
     credential_exception = HTTPException(
         status_code=401,
         detail="Не удалось проверить токен",
@@ -49,7 +62,20 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     return user
 
 
-def login_user(email: str, password: str):
+def login_user(email: str, password: str) -> str:
+    """
+    Authenticates the user and returns a JWT token.
+
+    args:
+    email: User's email
+    password: User's password
+
+    returns:
+    str: JWT access token
+
+    raises:
+    ValueError: If the email or password is incorrect
+    """
     session = SessionLocal()
     user = session.query(User).filter_by(email=email).first()
     session.close()
@@ -61,7 +87,10 @@ def login_user(email: str, password: str):
     return access_token
 
 
-def admin_required(current_user: User = Depends(get_current_user)):
+def admin_required(current_user: User = Depends(get_current_user)) -> User:
+    """
+    Checks if the user is an administrator and raise an exception if they are not
+    """
     if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -71,6 +100,18 @@ def admin_required(current_user: User = Depends(get_current_user)):
 
 
 def get_current_user_from_cookie(request: Request) -> User:
+    """
+    Gets the current user from the JWT token in the cookie.
+
+    args:
+    request: FastAPI Request object
+
+    returns:
+    User: User object
+
+    raises:
+    HTTPException: If the token is not found or is invalid
+    """
     token = request.cookies.get("access_token")
     if not token:
         raise HTTPException(status_code=401, detail="Токен не найден в cookie")
