@@ -1,7 +1,13 @@
+import pytest
+
 from app.schemas.tasks import TaskCreateData
 from app.services.task_service import TaskService
-from tests.constants.data import PriorityParameters, StatusParameters, TaskParameters
-from tests.constants.db import drop_test_db
+from tests.constants.data import (
+    MessageForCheck,
+    PriorityParameters,
+    StatusParameters,
+    TaskParameters,
+)
 
 
 def test_create_task_with_required_field(data_for_test):
@@ -69,3 +75,20 @@ def test_create_task_with_all_fields(data_for_test):
         task.priority == TaskParameters.PRIORITY
     ), f"{task.priority} not equal to {TaskParameters.PRIORITY}"
     TaskService.delete_task(db, user.id, task.id)
+
+
+def test_delete_task(create_default_test_task):
+    """
+    Scenario
+
+    1. Create default test task
+    2. Delete task from database
+    3. Check task not found
+    """
+    task, user, categories, db = create_default_test_task
+    success_message = TaskService.delete_task(db, user.id, task.id)
+    assert (
+        success_message == MessageForCheck.TASK_SUCCESS_DELETE
+    ), f"WARNING! {success_message} not equal to {MessageForCheck.TASK_SUCCESS_DELETE}"
+    with pytest.raises(ValueError, match=MessageForCheck.TASK_NOT_FOUND):
+        TaskService.get_user_task_by_id(db, user.id, task.id)
