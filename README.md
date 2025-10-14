@@ -42,7 +42,7 @@
 # Локальный запуск проекта
 
 - Клонируйте репозиторий ```git clone https://github.com/MaryKhm656/task-manager```
-- Создайте виртуальное окружение:
+- Создайте виртуальное окружение и активируйте его:
 ```commandline
 python -m venv venv
 ```
@@ -53,16 +53,22 @@ venv\Scripts\activate
 ```commandline
 pip install -r requirements.txt
 ```
-- Сгенерируйте SECRET_KEY и создайте .env файл:
+- Запустите файл **generate_secret.py** для генерации секретного ключа и создания .env файла:
 ```commandline
-python -c "import secrets; print(f'SECRET_KEY={secrets.token_hex(64)}')" > .env
+python generate_secret.py
 ```
 - После генерации секретного ключа, откройте .env файл и добавьте ваши данные для подключения к базе данных, по примеру из .env.example
 ```commandline
 DATABASE_URL=postgresql://<имя пользователя>:<пароль>@<хост>:<порт>/<название базы данных>
 ```
 - Запустите файл **init_database.py** для создания таблиц и связей в вашей базе данных
+```commandline
+python init_database.py
+```
 - После успешной инициализации, запустите файл main.py и перейдите по предложенной ссылке
+```commandline
+python main.py
+```
 
 ## Скриншоты
 
