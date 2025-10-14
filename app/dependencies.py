@@ -7,7 +7,7 @@ from app.crud.auth import get_current_user_from_cookie
 from app.db.database import SessionLocal
 
 
-def get_db() -> Generator[Session, None, None]:
+def get_db() -> Session:
     """Dependency to receive session for DB"""
     db = SessionLocal()
     try:
