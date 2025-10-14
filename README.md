@@ -70,6 +70,24 @@ python init_database.py
 python main.py
 ```
 
+## Права администратора
+Для того, чтобы установить пользователю флажок ```is_admin=true```, выполните следующие шаги. Перед выполнением, убедитесь, что у вас уже создан пользователь, у которого вы помните ```email```, а также, убедитесь, что у вас есть ```psql``` в переменной ```Path```  [Полезная статья](https://www.commandprompt.com/education/how-to-set-windows-path-for-postgres-tools/#:~:text=To%20set%20Windows%20PATH%20for%20PostgreSQL%20tools%2C%20firstly%2C%20open%20System,button%20to%20save%20all%20the)
+
+- Откройте PowerShell и перейдите в корень проекта
+```commandline
+cd C:/ваш/путь/к/проекту
+```
+- Перейдите в psql
+```commandline
+psql -U <постгрес юзер> -d <название базы данных>
+```
+Далее вас попросят ввести пароль для подключения к БД. Введите его.
+- Введите следующую команду для установки флажка is_admin для определенного пользователя
+```commandline
+SET is_admin = true FROM users WHERE email='почта_юзера';
+```
+- Готово!
+
 ## Скриншоты
 
 ### Приветственная страница
